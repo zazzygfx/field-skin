@@ -6,8 +6,8 @@
  * One stylesheet, themed entirely by tokens.css. Reshaped from the ejected
  * Video.js 10 default HTML skin. Visual state comes from the data-* attributes
  * Video.js sets (data-paused, data-muted, data-visible, …).
- *
- * Step 1 (skeleton): XL layout, tape strip, pills, play key, idle rail.
+ * Measurements: Figma "★ FIELD — Final" 174:338 (controls shown), 174:333 (watching),
+ * 169:3 (components), 174:1011 (settings).
  */
 @import '../../tokens.css';
 
@@ -16,9 +16,13 @@
   --field-ink-18: color-mix(in srgb, var(--field-ink) 18%, transparent);
   --field-ink-30: color-mix(in srgb, var(--field-ink) 30%, transparent);
   --field-ink-35: color-mix(in srgb, var(--field-ink) 35%, transparent);
+  --field-ink-62: color-mix(in srgb, var(--field-ink) 62%, transparent);
   --field-layer-hover: color-mix(in srgb, var(--field-ink) 8%, transparent);
   --field-layer-press: color-mix(in srgb, var(--field-ink) 12%, transparent);
+  --field-rail-track: color-mix(in srgb, var(--field-key) 40%, transparent);
+  --field-panel: color-mix(in srgb, var(--field-paper) 97%, transparent);
   --field-scrim: rgb(18 18 15 / .62);
+  --field-player-radius: 20px;
   --field-progress: 0%;
 }
 
@@ -31,9 +35,11 @@
   aspect-ratio: 16 / 9;
   overflow: hidden;
   isolation: isolate;
+  border-radius: var(--field-player-radius);
   background: #000;
   color: var(--field-ink);
   font-family: var(--field-font);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -55,15 +61,30 @@
   pointer-events: none;
   transition: opacity var(--field-hide) ease-out;
 }
-.field .field-poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.field .field-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .field .field-poster:not([data-visible]) { opacity: 0; }
 
-/* ---------- Scrim (bottom 170px, only while controls show) ---------- */
+/* ---------- Icons: Figma SVG assets as masks, so they follow --field-ink ---------- */
+.field .field-icon {
+  display: block;
+  flex: none;
+  width: 19px;
+  height: 19px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+.field [data-icon="volume"] { --icon: url('./icons/volume.svg'); }
+.field [data-icon="captions"] { --icon: url('./icons/captions.svg'); }
+.field [data-icon="pip"] { --icon: url('./icons/pip.svg'); }
+.field [data-icon="settings"] { --icon: url('./icons/settings.svg'); }
+.field [data-icon="fullscreen"] { --icon: url('./icons/fullscreen.svg'); }
+.field [data-icon="fullscreen-exit"] { --icon: url('./icons/fullscreen-exit.svg'); }
+.field [data-icon="pause"] { --icon: url('./icons/pause.svg'); width: 23px; height: 23px; }
+.field [data-icon="play"] { --icon: url('./icons/play.svg'); width: 22px; height: 22px; }
+.field [data-icon="replay"] { --icon: url('./icons/replay.svg'); width: 22px; height: 22px; }
+
+/* ---------- Scrim: bottom 170px, transparent → rgba(18,18,15,.62) ---------- */
 .field .field-scrim {
   position: absolute;
   inset: auto 0 0 0;
@@ -86,25 +107,19 @@
   border: 1px solid var(--field-edge);
   border-radius: 9px;
   background: var(--field-key);
-  box-shadow: var(--field-shadow);
   backdrop-filter: var(--field-blur);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 16px;
+  font: 500 13px/normal var(--field-font);
   white-space: nowrap;
   pointer-events: none;
 }
 .field .field-chip-title { overflow: hidden; text-overflow: ellipsis; }
 .field .field-chip-badge {
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 5px;
   background: var(--field-accent);
   color: var(--field-on-accent);
-  font-family: var(--field-mono);
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 12px;
-  letter-spacing: .06em;
+  font: 700 10px/normal var(--field-mono);
+  letter-spacing: .2px;
 }
 .field .field-chip-badge[hidden] { display: none; }
 
@@ -119,22 +134,19 @@
   position: absolute;
   left: var(--field-inset);
   right: var(--field-inset);
-  bottom: var(--field-inset);
+  bottom: calc(var(--field-inset) - 1px);   /* pill bottom 637 of 664 */
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 13px;                                 /* strip bottom 564 → pills 577 */
 }
 .field .field-controls-content > * { pointer-events: auto; }
 
-.field .field-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.field .field-row { display: flex; align-items: center; gap: 8px; }
 .field .field-row-gap { flex: 1; min-width: 0; }
 
 /* ---------- Pills ---------- */
 .field .field-pill {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -146,12 +158,13 @@
   backdrop-filter: var(--field-blur);
 }
 
-/* ---------- Keys ---------- */
+/* ---------- Keys (169:6 / 169:35) ---------- */
 .field .field-key {
   position: relative;
   box-sizing: border-box;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   min-width: var(--field-key-size);
   height: var(--field-key-size);
@@ -163,9 +176,10 @@
   box-shadow: var(--field-shadow);
   backdrop-filter: var(--field-blur);
   color: var(--field-ink);
-  font: 600 14px/1 var(--field-font);
+  font: 700 13px/normal var(--field-font);
+  font-variation-settings: "opsz" 14;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.01em;
+  white-space: nowrap;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -173,37 +187,40 @@
   touch-action: manipulation;
   outline: none;
   transition:
-    transform var(--field-press-up) var(--field-ease),
-    box-shadow var(--field-press-up) var(--field-ease),
-    background-image var(--field-press-up) var(--field-ease);
+    translate var(--field-press-up) var(--field-ease),
+    box-shadow var(--field-press-up) var(--field-ease);
 }
 .field .field-key-icon { padding: 0; width: var(--field-key-size); }
+.field .field-speed { padding: 0 9px; }
 
-.field .field-key media-icon,
-.field .field-key svg {
-  width: 20px;
-  height: 20px;
-  display: block;
+/* State layer: 8% hover, 12% pressed (inset -1px over the edge, like Figma) */
+.field .field-key::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+  transition: background-color var(--field-press-up) var(--field-ease);
 }
-
 @media (hover: hover) and (pointer: fine) {
-  .field .field-key:not([aria-disabled="true"]):hover {
-    background-image: linear-gradient(var(--field-layer-hover), var(--field-layer-hover));
-  }
-  .field .field-play:not([aria-disabled="true"]):hover { transform: translateY(-1px); }
+  .field .field-key:not([aria-disabled="true"]):hover::after { background: var(--field-layer-hover); }
+  .field .field-play:not([aria-disabled="true"]):hover { translate: 0 -1px; }
 }
-
 .field .field-key:not([aria-disabled="true"]):active {
-  transform: translateY(2px);
+  translate: 0 2px;
   box-shadow: none;
-  background-image: linear-gradient(var(--field-layer-press), var(--field-layer-press));
+  transition-duration: var(--field-press-down);
+}
+.field .field-key:not([aria-disabled="true"]):active::after {
+  background: var(--field-layer-press);
   transition-duration: var(--field-press-down);
 }
 
+/* Focus: 2px ink edge + 3px paper halo */
 .field .field-key:focus-visible {
-  outline: 2px solid var(--field-ink);
-  outline-offset: 0;
-  box-shadow: 0 0 0 5px var(--field-paper);
+  border-color: var(--field-ink);
+  box-shadow: inset 0 0 0 1px var(--field-ink), var(--field-shadow), 0 0 0 3px var(--field-paper);
   z-index: 1;
 }
 
@@ -218,84 +235,71 @@
   color: var(--field-on-accent);
 }
 
-/* Icon swaps driven by Video.js data attributes */
-.field media-mute-button .field-i-off,
-.field media-mute-button .field-i-low,
-.field media-mute-button[data-volume-level="off"] .field-i-high,
-.field media-mute-button[data-volume-level="low"] .field-i-high { display: none; }
-.field media-mute-button[data-volume-level="off"] .field-i-off,
-.field media-mute-button[data-volume-level="low"] .field-i-low { display: block; }
-
-.field media-mute-button[data-muted] {
+/* Muted: volume key turns --field-counter */
+.field media-mute-button[data-muted],
+.field media-mute-button[data-volume-level="off"] {
   background: var(--field-counter);
   border-color: var(--field-counter);
   color: var(--field-counter-text);
 }
 
-.field media-captions-button .field-i-on,
-.field media-captions-button[data-active] .field-i-off { display: none; }
-.field media-captions-button[data-active] .field-i-on { display: block; }
+.field media-fullscreen-button [data-icon="fullscreen-exit"],
+.field media-fullscreen-button[data-fullscreen] [data-icon="fullscreen"] { display: none; }
+.field media-fullscreen-button[data-fullscreen] [data-icon="fullscreen-exit"] { display: block; }
 
-.field media-pip-button .field-i-exit,
-.field media-pip-button[data-pip] .field-i-enter { display: none; }
-.field media-pip-button[data-pip] .field-i-exit { display: block; }
-
-.field media-fullscreen-button .field-i-exit,
-.field media-fullscreen-button[data-fullscreen] .field-i-enter { display: none; }
-.field media-fullscreen-button[data-fullscreen] .field-i-exit { display: block; }
-
-/* Speed key: label comes straight from data-rate */
-.field .field-speed::before {
-  content: attr(data-rate) "×";
-}
+/* Speed key label straight from Video.js data-rate */
+.field .field-speed::before { content: attr(data-rate) "×"; }
 .field .field-speed:not([data-rate])::before { content: "1×"; }
 
 /* ---------- Counter ---------- */
 .field .field-counter {
   box-sizing: border-box;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
   height: var(--field-key-size);
   padding: 0 10px;
   border-radius: 8px;
   background: var(--field-counter);
   color: var(--field-counter-text);
-  font: 700 15px/1 var(--field-mono);
-  letter-spacing: .04em;
+  font: 700 15px/normal var(--field-mono);
+  letter-spacing: .6px;
   white-space: pre;
-  font-variant-numeric: tabular-nums;
   user-select: none;
 }
 
-/* ---------- Play key (progress meter inside, SPEC §5) ---------- */
+/* ---------- Play key: 58px, radius 15, meter inside (169:51) ---------- */
 .field .field-play {
   width: var(--field-play-size);
   min-width: var(--field-play-size);
   height: var(--field-play-size);
   padding: 0;
-  border-radius: 25%;
+  border-radius: 15px;
+  overflow: hidden;
 }
-.field .field-play media-icon {
-  width: 40%;
-  height: 40%;
-  translate: 0 -6%;
+.field .field-play .field-icon {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--field-play-size) * 13 / 58 - 1px);
+  translate: calc(-50% - 1px) 0;   /* Figma sits the glyph 1px left of centre */
 }
-.field .field-play .field-i-play,
-.field .field-play .field-i-restart,
-.field .field-play[data-paused] .field-i-pause,
-.field .field-play[data-ended] .field-i-pause,
-.field .field-play[data-ended] .field-i-play { display: none; }
-.field .field-play[data-paused]:not([data-ended]) .field-i-play,
-.field .field-play[data-ended] .field-i-restart { display: block; }
-.field .field-play > media-icon { grid-area: 1 / 1; }
+.field .field-play [data-icon="play"],
+.field .field-play [data-icon="replay"] { top: calc(var(--field-play-size) * 12.64 / 58 - 1px); }
+.field .field-play [data-icon="play"],
+.field .field-play [data-icon="replay"],
+.field .field-play[data-paused] [data-icon="pause"],
+.field .field-play[data-ended] [data-icon="pause"],
+.field .field-play[data-ended] [data-icon="play"] { display: none; }
+.field .field-play[data-paused]:not([data-ended]) [data-icon="play"],
+.field .field-play[data-ended] [data-icon="replay"] { display: block; }
 
 .field .field-meter {
   position: absolute;
-  left: 22%;
-  width: 56%;
-  bottom: 20%;
+  /* Figma: x 12, w 32, y 45 on the 58px key (outer box; we sit inside the 1px edge) */
+  left: calc(var(--field-play-size) * 12 / 58 - 1px);
+  width: calc(var(--field-play-size) * 32 / 58);
+  top: calc(var(--field-play-size) * 45 / 58 - 1px);
   height: 3px;
-  border-radius: 1.5px;
+  border-radius: 1px;
   background: linear-gradient(
     to right,
     var(--field-accent) var(--field-progress),
@@ -305,7 +309,7 @@
 }
 .field .field-play[data-ended] .field-meter { --field-progress: 100%; }
 
-/* ---------- Tape strip (timeline, SPEC §2) ---------- */
+/* ---------- Tape strip (174:381) ---------- */
 .field .field-strip {
   position: relative;
   box-sizing: border-box;
@@ -317,11 +321,12 @@
   backdrop-filter: var(--field-blur);
 }
 
-/* The real slider: inner width (14px padding), 44px hit band */
+/* The real slider: inner width, 44px hit band. All y values are inside the 1px edge. */
 .field .field-strip-slider {
-  --strip-track-y: 14px;           /* track centre inside the 26px strip (minus 1px border) */
+  --hit: calc((var(--field-strip-hit) - var(--field-strip-h)) / 2 + 1px); /* strip inner top inside the hit band */
+  --track-y: calc(var(--hit) + 11px);                                    /* track centre: 12px from the strip's outer top */
   position: absolute;
-  left: 13px;
+  left: 12px;
   right: 13px;
   top: 50%;
   height: var(--field-strip-hit);
@@ -330,92 +335,73 @@
   cursor: pointer;
   touch-action: none;
   outline: none;
-  --hit-offset: calc((var(--field-strip-hit) - var(--field-strip-h)) / 2 + 1px);
 }
 
-/* Ticks every 5% of the inner width; every 5th one taller */
+/* Ticks every 5% of the inner width; every 5th one 6px, others 3px */
 .field .field-strip-slider::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(var(--hit-offset) + 4px);
+  top: calc(var(--hit) + 2px);
   height: 6px;
   pointer-events: none;
   background-image:
     linear-gradient(to right, var(--field-ink-35) 1px, transparent 1px),
     linear-gradient(to right, var(--field-ink-35) 1px, transparent 1px);
-  background-size:
-    calc((100% - 1px) / 4) 6px,
-    calc((100% - 1px) / 20) 3px;
+  background-size: calc((100% - 1px) / 4) 6px, calc((100% - 1px) / 20) 3px;
   background-repeat: repeat-x;
-  background-position: 0 0, 0 0;
 }
 
-.field .field-strip-chapters {
-  position: absolute;
-  inset: 0;
-  display: block;
-}
-.field .field-strip-chapter {
-  position: absolute;
-  inset: 0;
-  /* 2px gap between chapters */
-  clip-path: inset(
-    0
-    calc(100% - var(--media-slider-chapter-end, 100%) + 1px)
-    0
-    calc(var(--media-slider-chapter-start, 0%) + 1px)
-  );
-}
-.field .field-strip-chapter:first-child {
-  clip-path: inset(0 calc(100% - var(--media-slider-chapter-end, 100%) + 1px) 0 0);
-}
-.field .field-strip-chapter:last-child {
-  clip-path: inset(0 0 0 calc(var(--media-slider-chapter-start, 0%) + 1px));
-}
-.field .field-strip-chapter:only-child { clip-path: none; }
-
+/* Chapter segments: 4px gaps, radius 2 */
+.field .field-strip-chapters { position: absolute; inset: 0; display: block; }
+.field .field-strip-chapter { position: absolute; inset: 0; }
 .field .field-strip-track {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--hit-offset) + var(--strip-track-y) - 2px);
+  top: calc(var(--track-y) - 2px);
   height: 4px;
+  left: calc(var(--media-slider-chapter-start, 0%) + 2px);
+  right: calc(100% - var(--media-slider-chapter-end, 100%) + 2px);
   display: block;
+  overflow: hidden;
+  border-radius: 2px;
   background: var(--field-ink-18);
 }
+.field .field-strip-chapter:first-of-type .field-strip-track { left: 0; }
+.field .field-strip-chapter:last-of-type .field-strip-track { right: 0; }
+
+/* Buffered: ink 30% inside each segment, up to the buffered end */
 .field .field-strip-buffer {
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: var(--media-slider-buffer, 0%);
+  inset: 0;
   display: block;
   background: var(--field-ink-30);
+  clip-path: inset(0 calc(100% - (var(--media-slider-buffer, 0%) - var(--media-slider-chapter-start, 0%)) * 100% / (var(--media-slider-chapter-end, 100%) - var(--media-slider-chapter-start, 0%))) 0 0);
 }
+
+/* Played: one continuous 6px accent bar over the segments */
 .field .field-strip-fill {
   position: absolute;
   left: 0;
-  top: -1px;
+  top: calc(var(--track-y) - 3px);
   height: 6px;
   width: var(--media-slider-fill, 0%);
   display: block;
   border-radius: 3px;
   background: var(--field-accent);
+  pointer-events: none;
 }
 .field .field-strip-slider[data-dragging] .field-strip-fill { width: var(--media-slider-pointer, 0%); }
 
-/* Needle = the handle */
+/* Needle = the handle, 3 × 20 */
 .field .field-needle {
   position: absolute;
   left: var(--media-slider-fill, 0%);
-  top: calc(var(--hit-offset) + var(--strip-track-y));
+  top: var(--track-y);
   width: 3px;
   height: 20px;
   translate: -50% -50%;
   display: block;
-  border-radius: 1px;
   background: var(--field-ink);
   outline: none;
   z-index: 1;
@@ -424,11 +410,81 @@
 
 /* Focus ring goes on the whole strip */
 .field .field-strip:has(:focus-visible) {
-  outline: 2px solid var(--field-ink);
-  box-shadow: 0 0 0 5px var(--field-paper);
+  border-color: var(--field-ink);
+  box-shadow: inset 0 0 0 1px var(--field-ink), var(--field-shadow), 0 0 0 3px var(--field-paper);
 }
 
-/* ---------- Watching (idle): only the 4px rail stays (SPEC §4) ---------- */
+/* ---------- Settings panel (174:1088) — grows from the settings key ---------- */
+.field .field-settings-panel {
+  position: absolute;
+  right: calc(6px + var(--field-key-size) + 6px);   /* lines up with the settings key's right edge */
+  bottom: calc(100% + 8px);
+  z-index: 4;
+  box-sizing: border-box;
+  width: 340px;
+  max-width: calc(100cqw - 2 * var(--field-inset));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--field-edge);
+  border-radius: 18px;
+  background: var(--field-panel);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+  transform-origin: 100% 100%;
+  animation: field-grow var(--field-menu) var(--field-ease);
+}
+.field .field-settings-panel[hidden] { display: none; }
+@keyframes field-grow { from { opacity: 0; scale: .92; } }
+
+.field .field-group { display: flex; flex-direction: column; gap: 6px; }
+.field .field-group-label {
+  margin: 0;
+  color: var(--field-ink-62);
+  font: 400 10px/normal var(--field-mono);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.field .field-row-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--field-edge);
+  border-radius: 9px;
+  background: var(--field-key);
+  font: 700 13px/normal var(--field-font);
+  font-variation-settings: "opsz" 14;
+}
+
+/* Off / On segmented switch */
+.field .field-seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--field-ink) 8%, var(--field-key));
+}
+.field .field-seg button {
+  width: 48px;
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--field-ink);
+  font: 700 12px/normal var(--field-font);
+  font-variation-settings: "opsz" 14;
+  cursor: pointer;
+  touch-action: manipulation;
+  outline: none;
+}
+.field .field-seg button[aria-checked="true"] { background: var(--field-counter); color: var(--field-counter-text); }
+.field .field-seg button:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 4px var(--field-paper); }
+
+/* ---------- Watching (174:333): only the 4px rail + orange needle stay ---------- */
 .field .field-rail {
   position: absolute;
   left: 0;
@@ -437,11 +493,7 @@
   z-index: 2;
   height: 4px;
   pointer-events: none;
-  background: linear-gradient(
-    to right,
-    var(--field-accent) var(--field-progress),
-    color-mix(in srgb, var(--field-key) 40%, transparent) var(--field-progress)
-  );
+  background: linear-gradient(to right, var(--field-accent) var(--field-progress), var(--field-rail-track) var(--field-progress));
   opacity: 0;
   transition: opacity var(--field-show) ease-out;
 }
@@ -451,7 +503,6 @@
 .field .field-controls-content {
   transition: opacity var(--field-show) ease-out;
 }
-
 .field:not([data-controls-visible]) .field-chip,
 .field:not([data-controls-visible]) .field-scrim,
 .field:not([data-controls-visible]) .field-controls-content {
@@ -459,11 +510,17 @@
   transition-duration: var(--field-hide);
 }
 .field:not([data-controls-visible]) .field-controls-content > * { pointer-events: none; }
-.field:not([data-controls-visible]) .field-rail {
-  opacity: 1;
-  transition-duration: var(--field-hide);
-}
+.field:not([data-controls-visible]) .field-rail { opacity: 1; transition-duration: var(--field-hide); }
 .field:fullscreen:not([data-controls-visible]) { cursor: none; }
+
+/* ---------- Reduced motion: no translate, no scale; fades only ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .field .field-key,
+  .field .field-key:active,
+  .field .field-play:hover { translate: none !important; }
+  .field .field-settings-panel { animation-name: field-fade; }
+  @keyframes field-fade { from { opacity: 0; } }
+}
 
 /* ---------- Screen-reader only ---------- */
 .field .field-sr {

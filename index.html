@@ -23,8 +23,7 @@
     }
     main { width: min(1180px, 100% - 32px); margin: 48px auto; }
     .stage video-player { display: block; }
-    .stage .field { border-radius: 16px; }
-    .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
+        .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
   </style>
   <script type="module" src="/src/main.ts"></script>
 </head>
@@ -65,11 +64,11 @@
                       <div class="field-strip-chapter">
                         <media-slider-track class="field-strip-track">
                           <media-slider-buffer class="field-strip-buffer"></media-slider-buffer>
-                          <media-slider-fill class="field-strip-fill"></media-slider-fill>
                         </media-slider-track>
                       </div>
                     </template>
                   </media-time-slider-chapters>
+                  <media-slider-fill class="field-strip-fill"></media-slider-fill>
                   <media-slider-thumb class="field-needle"></media-slider-thumb>
                 </media-time-slider>
               </div>
@@ -79,9 +78,7 @@
                   <span class="field-counter" aria-hidden="true">-- -- --</span>
                   <media-seek-button class="field-key" seconds="-10" label="Back 10 seconds">−10</media-seek-button>
                   <media-mute-button class="field-key field-key-icon">
-                    <media-icon name="volume-high" class="field-i-high"></media-icon>
-                    <media-icon name="volume-low" class="field-i-low"></media-icon>
-                    <media-icon name="volume-off" class="field-i-off"></media-icon>
+                    <span class="field-icon" data-icon="volume"></span>
                   </media-mute-button>
                   <media-seek-button class="field-key" seconds="10" label="Forward 10 seconds">+10</media-seek-button>
                 </media-controls-group>
@@ -90,27 +87,38 @@
 
                 <media-controls-group class="field-pill field-pill-right" aria-label="Playback options">
                   <media-captions-button class="field-key field-key-icon">
-                    <media-icon name="captions-off" class="field-i-off"></media-icon>
-                    <media-icon name="captions-on" class="field-i-on"></media-icon>
+                    <span class="field-icon" data-icon="captions"></span>
                   </media-captions-button>
                   <media-playback-rate-button class="field-key field-speed" rates="1 1.25 1.5 2 0.5"></media-playback-rate-button>
                   <media-pip-button class="field-key field-key-icon">
-                    <media-icon name="pip-enter" class="field-i-enter"></media-icon>
-                    <media-icon name="pip-exit" class="field-i-exit"></media-icon>
+                    <span class="field-icon" data-icon="pip"></span>
                   </media-pip-button>
-                  <button type="button" class="field-key field-key-icon field-settings" aria-label="Settings">
-                    <media-icon name="settings"></media-icon>
+                  <button type="button" class="field-key field-key-icon field-settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="field-settings-1">
+                    <span class="field-icon" data-icon="settings"></span>
                   </button>
                   <media-fullscreen-button class="field-key field-key-icon">
-                    <media-icon name="fullscreen-enter" class="field-i-enter"></media-icon>
-                    <media-icon name="fullscreen-exit" class="field-i-exit"></media-icon>
+                    <span class="field-icon" data-icon="fullscreen"></span>
+                    <span class="field-icon" data-icon="fullscreen-exit"></span>
                   </media-fullscreen-button>
+
+                  <div class="field-settings-panel" id="field-settings-1" role="dialog" aria-label="Settings" hidden>
+                    <div class="field-group">
+                      <p class="field-group-label" id="field-ks-label-1">Key sounds</p>
+                      <div class="field-row-item">
+                        <span>Tape clicks on keys</span>
+                        <div class="field-seg" role="radiogroup" aria-labelledby="field-ks-label-1">
+                          <button type="button" role="radio" data-key-sounds="off" aria-checked="true">Off</button>
+                          <button type="button" role="radio" data-key-sounds="on" aria-checked="false">On</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </media-controls-group>
 
                 <media-play-button class="field-key field-play">
-                  <media-icon name="pause" class="field-i-pause"></media-icon>
-                  <media-icon name="play" class="field-i-play"></media-icon>
-                  <media-icon name="restart" class="field-i-restart"></media-icon>
+                  <span class="field-icon" data-icon="pause"></span>
+                  <span class="field-icon" data-icon="play"></span>
+                  <span class="field-icon" data-icon="replay"></span>
                   <span class="field-meter" aria-hidden="true"></span>
                 </media-play-button>
               </div>
@@ -137,7 +145,7 @@
         </media-container>
       </video-player>
     </div>
-    <p class="note">Step 1 · skeleton · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <p class="note">Step 1 (Figma rebuild) · skeleton · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
   </main>
 </body>
 </html>

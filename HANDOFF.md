@@ -17,7 +17,7 @@ npm run dev -- --host --port 5174
 ## Netlify
 
 - Site: **field-skin** (Netlify account "Zazzy Gfx"), site ID `266ea379-c86c-4914-b0b8-0c2d0d64460f`.
-- Current **draft**: https://6af5c7dcfba20d2263d9d152--field-skin.netlify.app (needs a Netlify login to view).
+- Current **draft**: https://6af5e20276c300b976ac43a6--field-skin.netlify.app (needs a Netlify login to view).
 - So far drafts only: `npm run build && npx netlify-cli deploy --dir dist`. Production (`--prod`) waits for step 8.
 
 ## Figma

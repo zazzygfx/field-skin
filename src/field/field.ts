@@ -6,7 +6,7 @@
  * Reshaped from the ejected Video.js 10 default HTML skin (v10.3.0).
  * Registers the Video.js elements FIELD uses, plus the small bits of
  * behaviour CSS can't do: tape counter, play-key meter, chapter chip,
- * controls lock while hovered/focused, settings panel, key sounds.
+ * controls lock while hovered/focused, key sounds, keyboard hint bar.
  */
 import './field.css';
 import '@videojs/html/i18n';
@@ -32,6 +32,19 @@ import '@videojs/html/ui/fullscreen-button';
 import '@videojs/html/ui/hotkey';
 import '@videojs/html/ui/gesture';
 import '@videojs/html/ui/status-announcer';
+import '@videojs/html/ui/tooltip';
+import '@videojs/html/ui/tooltip-group';
+import '@videojs/html/ui/tooltip-label';
+import '@videojs/html/ui/tooltip-shortcut';
+import '@videojs/html/ui/menu';
+import '@videojs/html/ui/menu-content';
+import '@videojs/html/ui/menu-group';
+import '@videojs/html/ui/menu-group-label';
+import '@videojs/html/ui/menu-radio-group';
+import '@videojs/html/ui/menu-radio-item';
+import '@videojs/html/ui/menu-item-indicator';
+import '@videojs/html/ui/quality-radio-group';
+import '@videojs/html/ui/captions-radio-group';
 import { KeySounds } from './sounds';
 
 const pad = (n: number) => String(Math.floor(n)).padStart(2, '0');
@@ -58,8 +71,23 @@ export function mountField(root: HTMLElement): void {
   const meter = root.querySelector<HTMLElement>('.field-meter');
   const chipBadge = root.querySelector<HTMLElement>('.field-chip-badge');
   const controls = root.querySelector<HTMLElement>('.field-controls-content');
-  const settingsKey = root.querySelector<HTMLElement>('.field-settings');
-  const settingsPanel = root.querySelector<HTMLElement>('.field-settings-panel');
+  const menu = root.querySelector<HTMLElement>('.field-menu');
+  const hints = root.querySelector<HTMLElement>('.field-hints');
+
+  /* ---------- Caption cue box: ::cue can't cross mux-video's shadow root ---------- */
+  const shadow = (media as HTMLElement).shadowRoot;
+  if (shadow && !shadow.querySelector('style[data-field-cue]')) {
+    const style = document.createElement('style');
+    style.dataset.fieldCue = '';
+    style.textContent = `video::cue {
+      background: var(--field-cue-bg);
+      color: var(--field-cue-text);
+      font-family: var(--field-font);
+      font-size: max(15px, 2.4cqw);
+      line-height: 1.35;
+    }`;
+    shadow.append(style);
+  }
 
   /* ---------- Counter, meter, chip ---------- */
   let chapters: { start: number; end: number }[] = [];
@@ -156,40 +184,46 @@ export function mountField(root: HTMLElement): void {
   media.addEventListener('play', clunk);
   media.addEventListener('pause', clunk);
 
-  /* ---------- Settings panel (grows from its key) ---------- */
-  const segs = settingsPanel?.querySelectorAll<HTMLButtonElement>('[data-key-sounds]') ?? [];
-  const syncSounds = () =>
-    segs.forEach((b) => b.setAttribute('aria-checked', String((b.dataset.keySounds === 'on') === sounds.enabled)));
-  segs.forEach((b) =>
-    b.addEventListener('click', () => {
-      sounds.set(b.dataset.keySounds === 'on');
-      syncSounds();
+  /* ---------- Settings menu: key-sounds switch + menu click ---------- */
+  const ksGroup = root.querySelector<HTMLElement & { value: string }>('[data-field-key-sounds]');
+  if (ksGroup) {
+    ksGroup.value = sounds.enabled ? 'on' : 'off';
+    ksGroup.addEventListener('value-change', (e) => {
+      sounds.set((e as CustomEvent<{ value: string }>).detail.value === 'on');
       sounds.play('tick');
-    }),
-  );
-  syncSounds();
-
-  const setOpen = (open: boolean, focusKey = false) => {
-    if (!settingsKey || !settingsPanel) return;
-    if (open === !settingsPanel.hidden) return;
-    settingsPanel.hidden = !open;
-    settingsKey.setAttribute('aria-expanded', String(open));
-    settingsKey.toggleAttribute('data-active', open);
-    lock('menu', open);
-    if (open) {
-      sounds.play('menu');
-      settingsPanel.querySelector<HTMLElement>('[aria-checked="true"]')?.focus({ preventScroll: true });
-    } else if (focusKey) settingsKey.focus();
-  };
-  settingsKey?.addEventListener('click', () => setOpen(!!settingsPanel?.hidden));
-  root.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && settingsPanel && !settingsPanel.hidden) {
-      e.stopPropagation();
-      setOpen(false, true);
-    }
+    });
+  }
+  menu?.addEventListener('open-change', (e) => {
+    const open = (e as CustomEvent<{ open: boolean }>).detail.open;
+    root.toggleAttribute('data-field-menu-open', open);
+    if (open) sounds.play('menu');
   });
-  document.addEventListener('pointerdown', (e) => {
-    const t = e.target as Node;
-    if (settingsPanel && !settingsPanel.hidden && !settingsPanel.contains(t) && !settingsKey?.contains(t)) setOpen(false);
+
+  /* ---------- Quality: "Auto (720p)" → "Auto" + accent value, as in Figma 174:1088 ---------- */
+  const quality = root.querySelector('media-quality-radio-group');
+  const splitAuto = () => {
+    for (const item of quality?.querySelectorAll<HTMLElement>('.field-option') ?? []) {
+      const label = item.querySelector<HTMLElement>('[data-part="label"]');
+      const badge = item.querySelector<HTMLElement>('[data-part="badge"]');
+      const m = label?.textContent?.match(/^(.+?)\s*\((.+)\)$/);
+      if (!label || !badge || !m) continue;
+      label.textContent = m[1];
+      badge.textContent = m[2];
+      badge.hidden = false;
+    }
+  };
+  if (quality) new MutationObserver(splitAuto).observe(quality, { subtree: true, childList: true, characterData: true });
+
+  /* ---------- Hint bar: after the first keyboard action, 4 s (SPEC §9) ---------- */
+  let hinted = false;
+  root.addEventListener('keydown', (e) => {
+    if (hinted || !hints || e.metaKey || e.ctrlKey || e.altKey) return;
+    hinted = true;
+    hints.hidden = false;
+    requestAnimationFrame(() => hints.setAttribute('data-show', ''));
+    setTimeout(() => {
+      hints.removeAttribute('data-show');
+      setTimeout(() => (hints.hidden = true), 400);
+    }, 4000);
   });
 }

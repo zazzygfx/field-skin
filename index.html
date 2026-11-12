@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — step 1</title>
+  <title>FIELD — step 2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
@@ -53,9 +53,21 @@
 
           <div class="field-rail" aria-hidden="true"></div>
 
+          <div class="field-hints" aria-hidden="true" hidden>
+            <span><kbd>K</kbd>Play</span>
+            <span><kbd>J</kbd><kbd>L</kbd>10s</span>
+            <span><kbd>↑</kbd><kbd>↓</kbd>Volume</span>
+            <span><kbd>M</kbd>Mute</span>
+            <span><kbd>C</kbd>Captions</span>
+            <span><kbd>&lt;</kbd><kbd>&gt;</kbd>Speed</span>
+            <span><kbd>P</kbd>PiP</span>
+            <span><kbd>F</kbd>Full</span>
+          </div>
+
           <media-controls class="field-controls">
             <media-controls-backdrop class="field-scrim"></media-controls-backdrop>
             <media-controls-content class="field-controls-content">
+              <media-tooltip-group delay="600" close-delay="0" class="field-tooltip-group">
 
               <div class="field-strip">
                 <media-time-slider class="field-strip-slider" label="Seek">
@@ -76,53 +88,86 @@
               <div class="field-row">
                 <media-controls-group class="field-pill field-pill-left" aria-label="Position and volume">
                   <span class="field-counter" aria-hidden="true">-- -- --</span>
-                  <media-seek-button class="field-key" seconds="-10" label="Back 10 seconds">−10</media-seek-button>
-                  <media-mute-button class="field-key field-key-icon">
+                  <media-seek-button class="field-key" id="field-back-1" seconds="-10" label="Back 10 seconds" aria-keyshortcuts="J">−10</media-seek-button>
+                  <media-tooltip trigger="field-back-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <media-mute-button class="field-key field-key-icon" id="field-mute-1" aria-keyshortcuts="M">
                     <span class="field-icon" data-icon="volume"></span>
                   </media-mute-button>
-                  <media-seek-button class="field-key" seconds="10" label="Forward 10 seconds">+10</media-seek-button>
+                  <media-tooltip trigger="field-mute-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <media-seek-button class="field-key" id="field-fwd-1" seconds="10" label="Forward 10 seconds" aria-keyshortcuts="L">+10</media-seek-button>
+                  <media-tooltip trigger="field-fwd-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
                 </media-controls-group>
 
                 <div class="field-row-gap"></div>
 
                 <media-controls-group class="field-pill field-pill-right" aria-label="Playback options">
-                  <media-captions-button class="field-key field-key-icon">
+                  <media-captions-button class="field-key field-key-icon" id="field-cc-1" aria-keyshortcuts="C">
                     <span class="field-icon" data-icon="captions"></span>
                   </media-captions-button>
-                  <media-playback-rate-button class="field-key field-speed" rates="1 1.25 1.5 2 0.5"></media-playback-rate-button>
-                  <media-pip-button class="field-key field-key-icon">
+                  <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5"></media-playback-rate-button>
+                  <media-tooltip trigger="field-speed-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <media-pip-button class="field-key field-key-icon" id="field-pip-1" aria-keyshortcuts="P">
                     <span class="field-icon" data-icon="pip"></span>
                   </media-pip-button>
-                  <button type="button" class="field-key field-key-icon field-settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="field-settings-1">
+                  <media-tooltip trigger="field-pip-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <button type="button" class="field-key field-key-icon field-settings" id="field-settings-key-1" commandfor="field-settings-1" aria-label="Settings">
                     <span class="field-icon" data-icon="settings"></span>
                   </button>
-                  <media-fullscreen-button class="field-key field-key-icon">
+                  <media-tooltip trigger="field-settings-key-1" side="top" class="field-tooltip"><span>Settings</span></media-tooltip>
+                  <media-fullscreen-button class="field-key field-key-icon" id="field-fs-1" aria-keyshortcuts="F">
                     <span class="field-icon" data-icon="fullscreen"></span>
                     <span class="field-icon" data-icon="fullscreen-exit"></span>
                   </media-fullscreen-button>
-
-                  <div class="field-settings-panel" id="field-settings-1" role="dialog" aria-label="Settings" hidden>
-                    <div class="field-group">
-                      <p class="field-group-label" id="field-ks-label-1">Key sounds</p>
-                      <div class="field-row-item">
-                        <span>Tape clicks on keys</span>
-                        <div class="field-seg" role="radiogroup" aria-labelledby="field-ks-label-1">
-                          <button type="button" role="radio" data-key-sounds="off" aria-checked="true">Off</button>
-                          <button type="button" role="radio" data-key-sounds="on" aria-checked="false">On</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <media-tooltip trigger="field-fs-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
                 </media-controls-group>
 
-                <media-play-button class="field-key field-play">
+                <media-play-button class="field-key field-play" id="field-play-1" aria-keyshortcuts="K">
                   <span class="field-icon" data-icon="pause"></span>
                   <span class="field-icon" data-icon="play"></span>
                   <span class="field-icon" data-icon="replay"></span>
                   <span class="field-meter" aria-hidden="true"></span>
                 </media-play-button>
+                <media-tooltip trigger="field-play-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
               </div>
 
+              <media-menu id="field-settings-1" class="field-menu" side="top" align="end">
+                <media-menu-content class="field-menu-content">
+                  <media-menu-group class="field-group field-group-quality">
+                    <media-menu-group-label class="field-group-label">Quality · from the stream</media-menu-group-label>
+                    <media-quality-radio-group class="field-options">
+                      <template>
+                        <media-menu-radio-item class="field-option">
+                          <span data-part="label"></span>
+                          <span class="field-option-value"><span data-part="badge"></span><media-menu-item-indicator class="field-check">✓</media-menu-item-indicator></span>
+                        </media-menu-radio-item>
+                      </template>
+                    </media-quality-radio-group>
+                  </media-menu-group>
+                  <media-menu-group class="field-group field-group-captions">
+                    <media-menu-group-label class="field-group-label">Captions · from the stream</media-menu-group-label>
+                    <media-captions-radio-group class="field-options">
+                      <template>
+                        <media-menu-radio-item class="field-option">
+                          <span data-part="label"></span>
+                          <span class="field-option-value"><span data-part="badge"></span><media-menu-item-indicator class="field-check">✓</media-menu-item-indicator></span>
+                        </media-menu-radio-item>
+                      </template>
+                    </media-captions-radio-group>
+                  </media-menu-group>
+                  <media-menu-group class="field-group">
+                    <media-menu-group-label class="field-group-label">Key sounds</media-menu-group-label>
+                    <div class="field-row-item">
+                      <span>Tape clicks on keys</span>
+                      <media-menu-radio-group class="field-seg" value="off" aria-label="Tape clicks on keys" data-field-key-sounds>
+                        <media-menu-radio-item value="off">Off</media-menu-radio-item>
+                        <media-menu-radio-item value="on">On</media-menu-radio-item>
+                      </media-menu-radio-group>
+                    </div>
+                  </media-menu-group>
+                </media-menu-content>
+              </media-menu>
+              </media-tooltip-group>
             </media-controls-content>
           </media-controls>
 
@@ -133,6 +178,8 @@
           <media-hotkey keys="ArrowLeft" action="seekStep" value="-10"></media-hotkey>
           <media-hotkey keys="l" action="seekStep" value="10"></media-hotkey>
           <media-hotkey keys="j" action="seekStep" value="-10"></media-hotkey>
+          <media-hotkey keys="ArrowUp" action="volumeStep" value="0.1"></media-hotkey>
+          <media-hotkey keys="ArrowDown" action="volumeStep" value="-0.1"></media-hotkey>
           <media-hotkey keys="0-9" action="seekToPercent"></media-hotkey>
           <media-hotkey keys=">" action="speedUp"></media-hotkey>
           <media-hotkey keys="<" action="speedDown"></media-hotkey>
@@ -145,7 +192,7 @@
         </media-container>
       </video-player>
     </div>
-    <p class="note">Step 1 (Figma rebuild) · skeleton · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <p class="note">Step 2 · core controls · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
   </main>
 </body>
 </html>

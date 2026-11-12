@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — step 4</title>
+  <title>FIELD — step 5</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
@@ -23,7 +23,17 @@
     }
     main { width: min(var(--stage-w, 1180px), 100% - 32px); margin: 48px auto; }
     .stage video-player { display: block; }
-        .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
+        .dev-panel { position: fixed; right: 16px; bottom: 16px; z-index: 1000; width: 300px; padding: 12px; border: 1px solid #CBC7B8; border-radius: 14px; background: #F4F2EC; box-shadow: 0 2px 0 rgb(23 22 15 / .35), 0 12px 32px rgb(23 22 15 / .18); font: 12px/1.3 "DM Sans", system-ui, sans-serif; color: #17160F; }
+    .dev-panel[hidden] { display: none; }
+    .dev-panel header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .dev-panel header span { font: 10px "Space Mono", monospace; opacity: .6; }
+    .dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .dev-panel button { display: flex; gap: 6px; align-items: center; min-height: 30px; padding: 0 8px; border: 1px solid #CBC7B8; border-radius: 8px; background: #EDEBE2; font: 600 12px "DM Sans", system-ui, sans-serif; color: #17160F; text-align: left; cursor: pointer; }
+    .dev-panel button span { font: 10px "Space Mono", monospace; opacity: .6; }
+    .dev-panel button[data-on] { background: #FF4D00; border-color: #C23A00; color: #FFF6EF; }
+    .dev-panel .dev-reset { width: 100%; justify-content: center; margin-top: 8px; }
+    .dev-now { margin: 8px 0 0; font: 11px "Space Mono", monospace; opacity: .7; }
+    .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
   </style>
   <script>
     // dev: ?w=364 sets the player width (XL 1180 · M 846 · S 500 · XS 364)
@@ -54,7 +64,9 @@
           <div class="field-chip">
             <span class="field-chip-badge" hidden></span>
             <span class="field-chip-title">Caminandes 3: Llamigos</span>
+            <span class="field-chip-status" hidden></span>
           </div>
+          <button type="button" class="field-golive" hidden><span class="field-golive-dot" aria-hidden="true"></span>Go to live</button>
 
           <div class="field-rail" aria-hidden="true"></div>
 
@@ -79,6 +91,43 @@
               <p class="field-ready-title">Caminandes 3: Llamigos</p>
               <p class="field-ready-meta"><span class="field-ready-length">2:30</span> · Blender Foundation</p>
             </div>
+          </div>
+
+          <div class="field-ended" hidden>
+            <media-play-button class="field-again">Watch again?</media-play-button>
+            <p class="field-ended-meta">Caminandes 3: Llamigos · <span class="field-ready-length">2:30</span></p>
+          </div>
+
+          <div class="field-error" role="alertdialog" aria-labelledby="field-error-title-1" aria-describedby="field-error-text-1" hidden>
+            <div class="field-error-card">
+              <p class="field-error-title" id="field-error-title-1">Can’t play this video</p>
+              <p class="field-error-text" id="field-error-text-1">The stream stopped responding. Check your connection and try again.</p>
+              <button type="button" class="field-error-retry">Try again</button>
+            </div>
+          </div>
+
+          <div class="field-pipnote" hidden>
+            <p>Playing in picture-in-picture</p>
+            <button type="button" class="field-pip-back">Bring it back here</button>
+          </div>
+
+          <div class="field-shelf" popover="manual" role="dialog" aria-label="Paused">
+            <button type="button" class="field-shelf-resume">
+              <span class="field-shelf-resume-icon"><span class="field-icon" data-icon="play"></span></span>
+              <span class="field-shelf-resume-text"><span class="field-shelf-resume-title">Resume</span><span class="field-shelf-resume-from">from 00:00</span></span>
+            </button>
+            <button type="button" class="field-shelf-row field-shelf-restart"><span>Start over</span><span class="field-shelf-time">00:00</span></button>
+            <div class="field-shelf-chapters" hidden>
+              <p class="field-shelf-label">Chapters · from the video</p>
+              <div class="field-shelf-list" role="list"></div>
+            </div>
+            <div class="field-shelf-jumps">
+              <button type="button" data-jump="-30">−30s</button>
+              <button type="button" data-jump="-10">−10s</button>
+              <button type="button" data-jump="10">+10s</button>
+              <button type="button" data-jump="30">+30s</button>
+            </div>
+            <p class="field-shelf-esc" aria-hidden="true"><kbd>Esc</kbd>hide</p>
           </div>
 
           <media-controls class="field-controls">
@@ -112,6 +161,7 @@
 
               <div class="field-row">
                 <media-controls-group class="field-pill field-pill-left" aria-label="Position and volume">
+                  <span class="field-keybubble" aria-hidden="true" hidden></span>
                   <span class="field-counter" aria-hidden="true">-- -- --</span>
                   <media-seek-button class="field-key" id="field-back-1" seconds="-10" label="Back 10 seconds" aria-keyshortcuts="J">−10</media-seek-button>
                   <media-tooltip trigger="field-back-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
@@ -135,7 +185,7 @@
                   <media-captions-button class="field-key field-key-icon" id="field-cc-1" aria-keyshortcuts="C">
                     <span class="field-icon" data-icon="captions"></span>
                   </media-captions-button>
-                  <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip field-tooltip-cc"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut><span class="field-tooltip-alt">No captions for this video</span></media-tooltip>
                   <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5" aria-haspopup="true" aria-expanded="false">
                     <span class="field-speed-label" aria-hidden="true">1×</span>
                     <span class="field-speed-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -239,7 +289,7 @@
         </media-container>
       </video-player>
     </div>
-    <p class="note">Step 4 · fluid sizes + phone. Try ?w=846, ?w=500, ?w=364. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <p class="note">Step 5 · states + fallbacks. Shift+D opens the state panel. Try ?w=846, ?w=500, ?w=364. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
   </main>
 </body>
 </html>

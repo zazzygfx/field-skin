@@ -17,10 +17,10 @@ export function mountSpeed(
   media: HTMLMediaElement,
   sounds: KeySounds,
   lock: (why: string, on: boolean) => void,
-): void {
+): { open: () => void } {
   const key = root.querySelector<HTMLElement>('.field-speed');
   const tray = root.querySelector<HTMLElement>('.field-tray');
-  if (!key || !tray) return;
+  if (!key || !tray) return { open: () => {} };
 
   /* ---------- Label + 7 ticks, driven by the media rate (not Video.js's data-rate,
      which is rewritten on every state update). Crossfade only on a real change. ---------- */
@@ -106,7 +106,7 @@ export function mountSpeed(
 
   const close = (returnFocus: boolean) => {
     clearTimeout(peekTimer);
-    if (!isOpen()) return;
+    if (!isOpen() || root.getAttribute('data-field-force') === 'speed') return;
     const hadFocus = tray.contains(document.activeElement);
     tray.hidden = true;
     key.setAttribute('aria-expanded', 'false');
@@ -179,4 +179,5 @@ export function mountSpeed(
     const t = e.target as Node;
     if (isOpen() && !tray.contains(t) && !key.contains(t)) close(false);
   });
+  return { open: () => open(false) };
 }

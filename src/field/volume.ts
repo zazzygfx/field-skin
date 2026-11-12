@@ -42,18 +42,19 @@ export function mountVolume(
   media: HTMLMediaElement,
   sounds: KeySounds,
   lock: (why: string, on: boolean) => void,
-): void {
+): { open: () => void; close: () => void } {
+  const noop = { open: () => {}, close: () => {} };
   const key = root.querySelector<HTMLElement>('.field-vol');
   const meter = root.querySelector<HTMLElement>('.field-wheel');
   const slot = meter?.querySelector<HTMLElement>('.field-wheel-slot');
   const ribsEl = meter?.querySelector<HTMLElement>('.field-wheel-ribs');
   const num = key?.querySelector<HTMLElement>('.field-vol-num');
   const pill = key?.closest<HTMLElement>('.field-pill');
-  if (!key || !meter || !slot || !ribsEl || !num || !pill) return;
+  if (!key || !meter || !slot || !ribsEl || !num || !pill) return noop;
 
   if (!canSetVolume()) {
     root.setAttribute('data-field-no-volume', '');
-    return; // the Video.js mute button keeps working on its own
+    return noop; // the Video.js mute button keeps working on its own
   }
 
   const level = () => (media.muted ? 0 : Math.round(media.volume * STEPS));
@@ -136,7 +137,7 @@ export function mountVolume(
 
   const close = () => {
     clearTimeout(closeTimer);
-    if (!isOpen()) return;
+    if (!isOpen() || root.getAttribute('data-field-force') === 'volume') return;
     dragging = false;
     const hadFocus = meter.contains(document.activeElement);
     root.setAttribute('data-field-wheel-closing', ''); // meter slides back into the key
@@ -306,4 +307,5 @@ export function mountVolume(
   });
 
   sync();
+  return { open, close };
 }

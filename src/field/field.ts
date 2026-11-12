@@ -55,6 +55,7 @@ import { formatCounter, formatShort, renderCounter } from './counter';
 import { mountVolume } from './volume';
 import { mountSpeed } from './speed';
 import { mountScrub, type Chapter } from './scrub';
+import { mountStates, type StatesApi } from './states';
 
 export { formatCounter };
 
@@ -71,8 +72,16 @@ export function mountField(root: HTMLElement): void {
   const player = root.closest<PlayerEl>('video-player');
 
   const counter = root.querySelector<HTMLElement>('.field-counter');
-  const length = root.querySelector<HTMLElement>('.field-ready-length');
+  const lengths = root.querySelectorAll<HTMLElement>('.field-ready-length');
   const chipBadge = root.querySelector<HTMLElement>('.field-chip-badge');
+  const chipTitle = root.querySelector<HTMLElement>('.field-chip-title');
+  const chipStatus = root.querySelector<HTMLElement>('.field-chip-status');
+  const bigplay = root.querySelector<HTMLElement>('.field-bigplay');
+  /** Dev panel can force a state (data-field-force); the skin reads it here. */
+  const forced = () => root.getAttribute('data-field-force');
+  let states: StatesApi | null = null;
+  let counterOverride: string | null = null;
+  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches || root.hasAttribute('data-field-calm');
   const controls = root.querySelector<HTMLElement>('.field-controls-content');
   const menu = root.querySelector<HTMLElement>('.field-menu');
   const hints = root.querySelector<HTMLElement>('.field-hints');
@@ -128,20 +137,48 @@ export function mountField(root: HTMLElement): void {
     const d = media.duration;
     const ready = media.readyState >= 1 && Number.isFinite(d) && d > 0;
     const short = size === 's' || size === 'xs'; // S size: MM:SS
-    const text =
-      ready && (!loading || scrubTime !== null)
+    const live = states?.isLive() ?? false;
+    const behind = live ? (states?.behindLive() ?? 0) : 0;
+    let text =
+      (ready || live) && (!loading || scrubTime !== null)
         ? short
           ? formatShort(scrubTime ?? t)
           : formatCounter(scrubTime ?? t)
         : short
           ? '--:--'
           : '-- -- --';
+    if (loading && scrubTime === null && reduceMotion()) text = 'LOADING';          // calm: no sweep, a word
+    if (live && scrubTime === null) text = behind > 10 ? `−${formatCounter(behind)}` : '● LIVE'; // states 14 / 15
+    if (counterOverride) text = counterOverride;
     if (counter) renderCounter(counter, text, scrubTime !== null);
-    if (length && ready) length.textContent = `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
-    root.style.setProperty('--field-progress', ready ? `${(t / d) * 100}%` : '0%');
+    if (ready) lengths.forEach((l) => (l.textContent = `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`));
+    root.style.setProperty('--field-progress', live && behind <= 10 ? '100%' : ready ? `${(t / d) * 100}%` : '0%');
+
+    /* chip: title (+ chapter badge), or what the player is doing */
+    const started = bigplay?.hasAttribute('data-started') ?? false;
+    const status = root.hasAttribute('data-field-error')
+      ? 'Playback error'
+      : root.hasAttribute('data-field-pip')
+        ? 'Picture in picture'
+        : live
+          ? 'Live'
+          : loading
+            ? started && forced() !== 'loading'
+              ? 'Buffering…'
+              : 'Loading…'
+            : root.hasAttribute('data-field-ended')
+              ? 'Ended'
+              : media.paused && started && !forced() && (size === 'xl' || size === 'm') && scrubTime === null
+                ? `Paused at ${formatShort(t)}`
+                : null;
+    if (chipStatus) {
+      chipStatus.hidden = !status;
+      chipStatus.textContent = status ?? '';
+    }
+    if (chipTitle) chipTitle.hidden = !!status;
     if (chipBadge) {
-      const i = chapters.findIndex((c) => t >= c.start && t < c.end);
-      chipBadge.hidden = i < 0;
+      const i = root.hasAttribute('data-field-no-chapters') ? -1 : chapters.findIndex((c) => t >= c.start && t < c.end);
+      chipBadge.hidden = i < 0 || !!status;
       if (i >= 0) chipBadge.textContent = `CH ${i + 1}`;
     }
   };
@@ -157,14 +194,19 @@ export function mountField(root: HTMLElement): void {
     render();
   };
 
-  for (const ev of ['timeupdate', 'durationchange', 'loadedmetadata', 'seeking', 'emptied']) {
+  for (const ev of ['timeupdate', 'durationchange', 'loadedmetadata', 'seeking', 'emptied', 'play', 'pause', 'ended']) {
     media.addEventListener(ev, render);
   }
+  new MutationObserver(render).observe(root, {
+    attributes: true,
+    attributeFilter: ['data-field-error', 'data-field-pip', 'data-field-ended', 'data-field-force', 'data-field-no-chapters', 'data-field-calm'],
+  });
 
   /* ---------- Loading / buffering (states 02 + 11): icon dims, counter reads -- -- -- ---------- */
   let loadingTimer = 0;
   const syncLoading = () => {
-    const now = !media.paused && (media.readyState < 3 || media.seeking);
+    const f = forced();
+    const now = f === 'loading' || f === 'buffering' || (!media.paused && (media.readyState < 3 || media.seeking));
     clearTimeout(loadingTimer);
     if (now === loading) return;
     const apply = () => {
@@ -278,9 +320,10 @@ export function mountField(root: HTMLElement): void {
   });
 
   /* ---------- Step 3: volume meter, speed tray, seek hover / scrub ---------- */
-  mountVolume(root, media, sounds, lock);
-  mountSpeed(root, media, sounds, lock);
-  mountScrub(
+  const volume = mountVolume(root, media, sounds, lock);
+  const speed = mountSpeed(root, media, sounds, lock);
+  states = mountStates(root, media, sounds, () => (root.hasAttribute('data-field-no-chapters') ? [] : chapters), lock, forced);
+  const scrub = mountScrub(
     root,
     media,
     () => chapters,
@@ -306,9 +349,38 @@ export function mountField(root: HTMLElement): void {
     hints.hidden = false;
     requestAnimationFrame(() => hints.setAttribute('data-show', ''));
     setTimeout(() => {
+      if (forced() === 'keyboard') return;
       hints.removeAttribute('data-show');
       setTimeout(() => (hints.hidden = true), 400);
     }, 4000);
+  });
+
+  /* ---------- Hooks for the dev state panel (dev page only; harmless elsewhere) ---------- */
+  Object.assign(root, {
+    fieldDev: {
+      media,
+      volume,
+      speed,
+      scrub,
+      states,
+      render,
+      syncLoading,
+      setCounter: (text: string | null) => {
+        counterOverride = text;
+        render();
+      },
+      showHints: () => {
+        if (!hints) return;
+        hinted = true;
+        hints.hidden = false;
+        hints.setAttribute('data-show', '');
+      },
+      hideHints: () => {
+        if (!hints) return;
+        hints.removeAttribute('data-show');
+        hints.hidden = true;
+      },
+    },
   });
 
   applySize(root.getBoundingClientRect().width);

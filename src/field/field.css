@@ -1107,6 +1107,380 @@
   .field .field-menu[data-ending-style] { scale: 1; transform: translateX(24px); }
 }
 
+/* =====================================================================
+   States + fallbacks (SPEC §10)
+   ===================================================================== */
+
+/* Chip: title, or what the player is doing ("Paused at 01:23", "Live", "Ended"…) */
+.field .field-chip-status[hidden],
+.field .field-chip-title[hidden] { display: none; }
+
+/* Go to live (15): accent chip next to the title chip */
+.field .field-golive {
+  position: absolute;
+  top: max(var(--field-inset), env(safe-area-inset-top));
+  left: calc(max(var(--field-inset), env(safe-area-inset-left)) + 64px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 31px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--field-accent-edge);
+  border-radius: 9px;
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+  font: 700 12px/1 var(--field-font);
+  cursor: pointer;
+  outline: none;
+}
+.field .field-golive[hidden] { display: none; }
+.field .field-golive-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.field .field-golive:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field:not([data-controls-visible]) .field-golive { opacity: 0; }
+
+/* Live (14): +10 is off at the live edge */
+.field[data-field-live]:not([data-field-behind]) media-seek-button[seconds="10"] { opacity: .38; pointer-events: none; }
+
+/* Key bubbles (04 seek, 06 muted): grow out of the pressed key */
+.field .field-keybubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  z-index: 5;
+  translate: -50% 0;
+  padding: 6px 10px;
+  border: 1px solid var(--field-accent-edge);
+  border-radius: 8px;
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+  font: 700 12px/normal var(--field-mono);
+  white-space: nowrap;
+  box-shadow: var(--field-shadow);
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+.field .field-keybubble[hidden] { display: none; }
+.field .field-keybubble[data-show] { animation: field-grow var(--field-menu) var(--field-ease); }
+
+/* No captions (09): key stays, dimmed 38%, tooltip says why */
+.field[data-field-no-captions] media-captions-button {
+  display: inline-flex !important;
+  opacity: .38;
+}
+.field .field-tooltip-alt { display: none; }
+.field[data-field-no-captions] .field-tooltip-cc media-tooltip-label,
+.field[data-field-no-captions] .field-tooltip-cc .field-tooltip-key { display: none; }
+.field[data-field-no-captions] .field-tooltip-cc .field-tooltip-alt { display: inline; }
+
+/* No chapters (19): strip = one continuous line */
+.field[data-field-no-chapters] .field-strip-chapter:not(:first-of-type) { display: none; }
+.field[data-field-no-chapters] .field-strip-chapter .field-strip-track { left: 0; right: 0; }
+
+/* ---------- Pause shelf (Figma 174:809 / 174:922) ---------- */
+.field .field-shelf {
+  position: absolute;
+  inset: max(var(--field-inset), env(safe-area-inset-top)) max(var(--field-inset), env(safe-area-inset-right)) auto auto;
+  z-index: 4;
+  box-sizing: border-box;
+  width: 300px;
+  height: auto;
+  margin: 0;
+  overflow: visible;               /* popover UA default is auto: no scrollbar, Esc hint below */
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--field-edge);
+  border-radius: 18px;
+  background: var(--field-panel);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+  color: var(--field-ink);
+  font-family: var(--field-font);
+  transform-origin: 100% 0;
+}
+.field[data-field-shelf] .field-shelf { display: flex; animation: field-grow var(--field-menu) var(--field-ease); }
+.field .field-shelf button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+}
+.field .field-shelf button:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+
+.field .field-shelf-resume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--field-accent-edge);
+  border-radius: 12px;
+  background: var(--field-accent);
+  color: var(--field-on-accent) !important;
+  text-align: left;
+}
+.field .field-shelf-resume-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--field-on-accent);
+  color: var(--field-accent);
+}
+.field .field-shelf-resume-icon .field-icon { width: 18px; height: 18px; }
+.field .field-shelf-resume-text { display: flex; flex-direction: column; gap: 2px; }
+.field .field-shelf-resume-title { font: 700 16px/normal var(--field-font); font-variation-settings: "opsz" 14; }
+.field .field-shelf-resume-from { font: 400 11px/normal var(--field-mono); letter-spacing: .11px; opacity: .85; }
+
+.field .field-shelf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--field-edge);
+  border-radius: 12px;
+  background: var(--field-key);
+  font: 700 14px/normal var(--field-font) !important;
+  font-variation-settings: "opsz" 14;
+}
+.field .field-shelf-time { font: 400 11px/normal var(--field-mono); color: var(--field-ink-62); }
+
+.field .field-shelf-chapters {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 8px 8px;
+  border: 1px solid var(--field-edge);
+  border-radius: 12px;
+  background: var(--field-key);
+}
+.field .field-shelf-chapters[hidden],
+.field .field-shelf-jumps[hidden] { display: none; }
+.field .field-shelf-label {
+  margin: 0;
+  padding-left: 10px;
+  color: var(--field-ink-62);
+  font: 400 10px/normal var(--field-mono);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.field .field-shelf-list { display: flex; flex-direction: column; gap: 2px; }
+.field .field-shelf-chapter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+}
+@media (hover: hover) and (pointer: fine) {
+  .field .field-shelf-chapter:hover { background: var(--field-layer-hover); }
+}
+.field .field-shelf-n { font: 700 12px/normal var(--field-mono); color: var(--field-ink-62); }
+.field .field-shelf-title { flex: 1; min-width: 0; font: 500 13px/normal var(--field-font); font-variation-settings: "opsz" 14; }
+.field .field-shelf-chapter[data-current] { background: var(--field-counter); color: var(--field-counter-text); }
+.field .field-shelf-chapter[data-current] .field-shelf-n { color: var(--field-accent); }
+.field .field-shelf-chapter[data-current] .field-shelf-time { color: color-mix(in srgb, var(--field-counter-text) 70%, transparent); }
+
+.field .field-shelf-jumps { display: flex; gap: 6px; }
+.field .field-shelf-jumps button {
+  flex: 1;
+  padding: 12px 0;
+  border: 1px solid var(--field-edge);
+  border-radius: 10px;
+  background: var(--field-key);
+  font: 700 12px/normal var(--field-mono) !important;
+}
+.field .field-shelf-esc {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 10px 5px 6px;
+  border-radius: 7px;
+  background: var(--field-counter);
+  color: color-mix(in srgb, var(--field-counter-text) 75%, transparent);
+  font: 500 11px/normal var(--field-font);
+}
+.field .field-shelf-esc kbd {
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--field-counter-text) 50%, transparent);
+  border-radius: 4px;
+  color: var(--field-counter-text);
+  font: 400 10px/normal var(--field-mono);
+}
+/* the shelf takes the top-right; the centred key moves out of its way */
+.field[data-field-shelf] .field-center { padding-right: 0; }
+
+/* Phone upright: the shelf becomes an M3 bottom sheet (top layer) */
+@media (pointer: coarse) and (orientation: portrait) {
+  .field .field-shelf:popover-open {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    display: flex;
+    max-height: 80svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 16px calc(16px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 28px 28px 0 0;
+    animation: field-sheet-up 220ms var(--field-ease);
+  }
+  .field .field-shelf:popover-open::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 32px;
+    height: 4px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: var(--field-ink-30);
+  }
+  .field .field-shelf::backdrop { background: rgb(18 18 15 / .4); }
+  .field .field-shelf-esc { display: none; }
+  .field .field-shelf-chapter,
+  .field .field-shelf-row { min-height: 48px; }
+}
+@keyframes field-sheet-up { from { transform: translateY(24px); opacity: 0; } }
+
+/* ---------- Ended (12): "Watch again?" ---------- */
+.field .field-ended {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--field-counter) 45%, transparent);
+  color: var(--field-counter-text);
+  text-align: center;
+}
+.field .field-ended[hidden] { display: none; }
+.field .field-again {
+  padding: 4px 10px;
+  border-radius: 10px;
+  font: 700 32px/1.2 var(--field-font);
+  letter-spacing: -.01em;
+  cursor: pointer;
+  outline: none;
+}
+.field .field-again:focus-visible { box-shadow: 0 0 0 2px var(--field-counter-text), 0 0 0 5px var(--field-counter); }
+.field .field-ended-meta { margin: 0; font: 500 12px/1.4 var(--field-font); opacity: .8; }
+@container field (max-width: 599px) { .field .field-again { font-size: 22px; } }
+
+/* ---------- Error (13): one action, controls dim to 30% ---------- */
+.field .field-error {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--field-counter) 40%, transparent);
+}
+.field .field-error[hidden] { display: none; }
+.field .field-error-card {
+  max-width: 360px;
+  padding: 18px 20px;
+  border: 1px solid var(--field-edge);
+  border-radius: 14px;
+  background: var(--field-paper);
+  box-shadow: var(--field-shadow);
+  color: var(--field-ink);
+}
+.field .field-error-title { margin: 0 0 6px; font: 700 16px/1.3 var(--field-font); }
+.field .field-error-text { margin: 0 0 14px; font: 400 13px/1.45 var(--field-font); color: var(--field-ink-62); }
+.field .field-error-retry {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--field-accent-edge);
+  border-radius: 10px;
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+  font: 700 13px/1 var(--field-font);
+  cursor: pointer;
+  outline: none;
+}
+.field .field-error-retry:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field[data-field-error] .field-controls-content,
+.field[data-field-error] .field-center { opacity: .3 !important; pointer-events: none; }
+
+/* ---------- Picture-in-picture active (17) ---------- */
+.field .field-pipnote {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--field-counter) 78%, transparent);
+  color: var(--field-counter-text);
+}
+.field .field-pipnote[hidden] { display: none; }
+.field .field-pipnote p { margin: 0; font: 500 16px/1.3 var(--field-font); }
+.field .field-pip-back {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--field-edge);
+  border-radius: 9px;
+  background: var(--field-key);
+  color: var(--field-ink);
+  font: 700 12px/1 var(--field-font);
+  cursor: pointer;
+  outline: none;
+}
+.field .field-pip-back:focus-visible { box-shadow: 0 0 0 2px var(--field-counter-text), 0 0 0 5px var(--field-counter); }
+.field[data-field-pip] .field-center { display: none; }
+
+/* ---------- More contrast (18) ---------- */
+@media (prefers-contrast: more) {
+  .field .field-key,
+  .field .field-strip,
+  .field .field-pill,
+  .field .field-chip { border-color: var(--field-ink); box-shadow: inset 0 0 0 1px var(--field-ink), var(--field-shadow); }
+}
+.field[data-field-contrast] > * { --field-pill: #FFFFFF; --field-edge: var(--field-ink); }
+.field[data-field-contrast] :is(.field-key, .field-strip, .field-pill, .field-chip) {
+  border-color: var(--field-ink);
+  box-shadow: inset 0 0 0 1px var(--field-ink), var(--field-shadow);
+}
+
+/* ---------- Calm (20): reduced motion / transparency / contrast / forced colours ---------- */
+.field[data-field-calm] > * { --field-show: 0ms; --field-hide: 0ms; --field-press-down: 0ms; --field-press-up: 0ms; --field-wheel: 0ms; --field-menu: 0ms; }
+.field[data-field-calm] *,
+.field[data-field-calm] *::before,
+.field[data-field-calm] *::after { animation: none !important; translate: none; }
+@media (forced-colors: active) {
+  .field .field-key,
+  .field .field-pill,
+  .field .field-strip,
+  .field .field-chip { background: ButtonFace; color: ButtonText; border-color: ButtonText; forced-color-adjust: none; }
+  .field .field-needle,
+  .field .field-strip-fill,
+  .field .field-wheel-index { background: Highlight; }
+  .field .field-key:focus-visible { outline: 2px solid Highlight; }
+}
+
+/* Forced dev states show only that state (no big paused key) */
+.field[data-field-force]:not([data-field-force="ready"]) .field-center { display: none; }
+/* Ready forced from the dev panel looks like the real thing */
+.field[data-field-force="ready"] .field-ready { display: block; }
+.field[data-field-force="ready"] :is(.field-chip, .field-scrim, .field-controls-content, .field-rail) { opacity: 0; visibility: hidden; }
+
 /* ---------- Reduced motion: no translate, no scale; fades only ---------- */
 @media (prefers-reduced-motion: reduce) {
   .field .field-key,

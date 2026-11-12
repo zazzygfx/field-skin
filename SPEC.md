@@ -126,7 +126,7 @@ Figma 178:886 (component) and 180:629 (open in place).
 All grow from the key that opened them: `transform-origin` = that key, `scale(.92) → 1` + fade, 180 ms. Esc closes and returns focus to the key.
 
 - **Settings (XL/M):** 340 wide, radius 18, `--field-pill` 97%. Groups: **Quality** (from the stream; hidden on single-rendition files) and **Captions** (from the stream). Rows 44px high, radius 9, selected row `--field-counter` with accent value text.
-- **Pause shelf (XL/M):** top-right, 300 wide. **Resume** (accent, shows `from 01:23`) · **Start over** · then either **Chapters** (titles + times from the chapters track, current one highlighted) **or**, with no chapters, quick jumps −30s −10s +10s +30s. Small `Esc hide` hint below. See `reference/06-pause-settings.png`.
+- **Pause shelf (XL/M):** top-right, 300 wide. **Resume** (accent, shows `from 01:23`) · **Start over** · then either **Chapters** (titles + times from the chapters track, current one highlighted) **or**, with no chapters, quick jumps −30s −10s +10s +30s. Small `Esc hide` hint below. See `reference/06-pause-settings.png`. Figma 174:809 (chapters) / 174:922 (quick jumps). The title chip reads `Paused at 01:23` while the shelf shows; the 96px centred play key shows too. The shelf only appears after playback has started, never while ended, scrubbing, in error or in PiP. Esc hides it until the next pause.
 - **Phone upright:** M3 bottom sheet — 28px top radius, 32 × 4 handle, 48px rows, scrim 40%. *More* sheet = speed chips, captions chips, quality, PiP, fullscreen. *Pause* sheet = Resume, Start over, chapters.
 - **Phone sideways:** M3 side sheet from the right, 300 wide, left radius 24.
 
@@ -225,6 +225,10 @@ Animate only `transform` and `opacity`.
 
 ---
 
-## 15. Copy
+## 15. Dev state panel
+
+On the dev page, **Shift+D** opens a panel that forces the player into each of the 20 states above (and Reset). It sets `data-field-force` on the player; it is not part of the skin.
+
+## 16. Copy
 
 Sentence case everywhere in the player. Action names stay the same through a flow ("Try again" → retries).

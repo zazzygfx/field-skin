@@ -18,13 +18,13 @@ export function mountScrub(
   media: HTMLMediaElement,
   getChapters: () => Chapter[],
   onScrub: (time: number | null) => void,
-): void {
+): { showAt: (pct: number) => void } {
   const strip = root.querySelector<HTMLElement>('.field-strip');
   const slider = root.querySelector<HTMLElement>('.field-strip-slider');
   const tag = root.querySelector<HTMLElement>('.field-scrub-tag');
   const label = root.querySelector<HTMLElement>('.field-scrub-label');
   const frame = root.querySelector<HTMLElement>('.field-scrub-frame');
-  if (!strip || !slider || !tag || !label || !frame) return;
+  if (!strip || !slider || !tag || !label || !frame) return { showAt: () => {} };
 
   let hovering = false;
   let dragging = false;
@@ -51,7 +51,7 @@ export function mountScrub(
   };
 
   const hide = () => {
-    if (hovering || dragging) return;
+    if (hovering || dragging || root.getAttribute('data-field-force') === 'scrub') return;
     root.removeAttribute('data-field-scrubbing');
     onScrub(null);
   };
@@ -87,4 +87,10 @@ export function mountScrub(
     root.toggleAttribute('data-field-no-frame', frame.hasAttribute('data-hidden') || frame.hasAttribute('data-error'));
   new MutationObserver(syncFrame).observe(frame, { attributes: true, attributeFilter: ['data-hidden', 'data-error'] });
   syncFrame();
+  return {
+    showAt: (pct: number) => {
+      const r = slider.getBoundingClientRect();
+      show(r.left + pct * r.width);
+    },
+  };
 }

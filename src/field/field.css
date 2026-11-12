@@ -301,26 +301,23 @@
   translate: -50% -50%;
 }
 
-/* Tape-transport morph (SPEC §5): bars slide together (0–80 ms), then the
-   triangle grows in as the key rises (80–180 ms). Same in reverse. */
-.field .field-play .field-icon {
-  transition:
-    opacity 100ms var(--field-ease) 80ms,
-    scale 100ms var(--field-ease) 80ms;
-}
+/* Tape-transport morph (SPEC §5): the right glyph is always shown at full
+   opacity; the incoming one grows in (bars spread / triangle grows) as the key rises. */
 .field .field-play [data-icon="play"],
-.field .field-play [data-icon="replay"] { opacity: 0; scale: .6; }
+.field .field-play [data-icon="replay"],
 .field .field-play[data-paused] [data-icon="pause"],
-.field .field-play[data-ended] [data-icon="pause"] {
-  opacity: 0;
-  scale: .3 1;                      /* the two bars slide together */
-  transition-duration: 80ms;
-  transition-delay: 0ms;
-}
-.field .field-play:not([data-paused]) [data-icon="play"],
-.field .field-play[data-ended] [data-icon="play"] { transition-duration: 80ms; transition-delay: 0ms; }
+.field .field-play[data-ended] [data-icon="pause"],
+.field .field-play[data-ended] [data-icon="play"] { display: none; }
 .field .field-play[data-paused]:not([data-ended]) [data-icon="play"],
-.field .field-play[data-ended] [data-icon="replay"] { opacity: 1; scale: 1; }
+.field .field-play[data-ended] [data-icon="replay"] { display: block; }
+.field .field-play [data-icon="pause"] { animation: field-bars-in 180ms var(--field-ease); }
+.field .field-play [data-icon="play"],
+.field .field-play [data-icon="replay"] { animation: field-glyph-in 180ms var(--field-ease); }
+@keyframes field-bars-in { from { scale: .3 1; } }
+@keyframes field-glyph-in { from { scale: .6; } }
+/* play keys never look disabled (Video.js marks them aria-disabled until media attaches) */
+.field .field-play[aria-disabled="true"],
+.field .field-bigplay { opacity: 1; }
 
 /* Loading / buffering: the icon dims to 40% (no meter, no ring) */
 .field[data-field-loading] .field-play:not([data-paused]) [data-icon="pause"] { opacity: .4; }
@@ -549,8 +546,7 @@
 .field .field-check { display: none; }
 .field .field-option[aria-checked="true"] .field-check { display: inline; }
 .field .field-option [data-part="badge"][hidden] { display: none; }
-.field .field-option:focus-visible,
-.field .field-option[data-highlighted] {
+.field .field-option:focus-visible {
   box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper);
 }
 
@@ -587,8 +583,7 @@
   outline: none;
 }
 .field .field-seg > [aria-checked="true"] { background: var(--field-counter); color: var(--field-counter-text); }
-.field .field-seg > :focus-visible,
-.field .field-seg > [data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 4px var(--field-paper); }
+.field .field-seg > :focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 4px var(--field-paper); }
 
 /* Settings key reads as active while its menu is open */
 .field .field-settings[aria-expanded="true"] {
@@ -993,8 +988,7 @@
   background: var(--field-accent);
   color: var(--field-on-accent);
 }
-.field .field-chip-option:focus-visible,
-.field .field-chip-option[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field .field-chip-option:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
 .field .field-option[hidden] { display: none; }
 
 /* ---------- Fluid sizes (SPEC §3, Figma 180:861 / 180:968) — keys fold away, never shrink ---------- */
@@ -1026,6 +1020,22 @@
   .field .field-bigplay { --field-play-size: 72px; }
   .field .field-ready-title { font-size: 15px; }
   .field .field-scrub-tag { font-size: 12px; padding: 4px 6px; }
+}
+
+/* ---------- Phone (touch, player < 600): native-size keys, 44px hit areas ---------- */
+@media (pointer: coarse) {
+  @container field (max-width: 599px) {
+    .field > * { --field-key-size: 40px; --field-play-size: 48px; }
+    .field .field-pill { padding: 4px; gap: 4px; }
+    .field .field-icon { width: 18px; height: 18px; }
+    .field .field-play .field-icon { width: calc(var(--field-play-size) * .44); height: calc(var(--field-play-size) * .44); }
+    .field .field-counter { font-size: 13px; padding: 0 8px; }
+    .field .field-vol-num { font-size: 16px; }
+    .field .field-key { font-size: 12px; }
+    /* invisible padding: every key still answers a 44px touch */
+    .field .field-key::before { content: ""; position: absolute; inset: -3px; }
+    .field .field-play::before { inset: 0; }
+  }
 }
 
 /* ---------- Double-tap seek: ripple on that side + accent bubble (touch) ---------- */
@@ -1500,8 +1510,7 @@
 .field .field-more-row[hidden],
 .field .field-more-row[data-hidden] { display: none; }
 .field .field-more-row:active { background-image: linear-gradient(var(--field-layer-press), var(--field-layer-press)); }
-.field .field-more-row:focus-visible,
-.field .field-more-row[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field .field-more-row:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
 .field .field-more-value {
   margin-left: auto;
   color: var(--field-ink-62);
@@ -1519,8 +1528,7 @@
   outline: none;
 }
 .field .field-more-back:active { opacity: .6; }
-.field .field-more-back:focus-visible,
-.field .field-more-back[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink); border-radius: 10px; }
+.field .field-more-back:focus-visible { box-shadow: 0 0 0 2px var(--field-ink); border-radius: 10px; }
 .field .field-more-options { display: flex; flex-direction: column; gap: 4px; }
 .field .field-more-option[hidden] { display: none; }
 .field .field-more-option .field-check { display: none; margin-left: auto; color: var(--field-accent); font-weight: 700; }
@@ -1548,7 +1556,7 @@
   .field .field-tray { animation-name: field-fade; }
   .field .field-wheel,
   .field[data-field-wheel-closing] .field-wheel { animation: none; }
-  .field .field-play .field-icon { transition: none !important; scale: 1 !important; }
+  .field .field-play .field-icon { animation: none !important; }
   .field [data-popup][data-starting-style],
   .field [data-popup][data-ending-style] { scale: 1; }
   @keyframes field-fade { from { opacity: 0; } }

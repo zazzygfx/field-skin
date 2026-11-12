@@ -430,6 +430,19 @@ export function mountField(root: HTMLElement): void {
   for (const ev of ['seeked', 'pause', 'play', 'loadedmetadata']) media.addEventListener(ev, syncChapterPage);
   settingsKey?.addEventListener('click', syncChapterPage, true);
 
+  /* ---------- Tapping the picture closes an open sheet / menu (like Iris) ----------
+     A tap on a sheet's scrim (::backdrop) targets the popover itself, which
+     Video.js counts as "inside" — so close it when the point is outside its box. */
+  type Closable = HTMLElement & { close?: (reason?: string) => void };
+  for (const m of [menu, more] as (Closable | null)[]) {
+    m?.addEventListener('pointerdown', (e) => {
+      if (e.target !== m) return;
+      const r = m.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) m.close?.('outside-click');
+    });
+  }
+
   /* ---------- Hint bar: after the first keyboard action, 4 s (SPEC §9) ---------- */
   let hinted = false;
   root.addEventListener('keydown', (e) => {

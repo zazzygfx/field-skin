@@ -1,7 +1,7 @@
 # FIELD — handoff
 
 Status as of 12 Nov 2026. Deadline: **Mon 16 Nov 2026, 11:59 pm PST**.
-Steps 1–8 of the build order in `CLAUDE.md` are done and committed (step 8 = showcase site, deployed as a draft). Step 9 is not started.
+Steps 1–9 are done. Live at **https://field-skin.netlify.app** (production, public); repo **https://github.com/zazzygfx/field-skin** (public, Apache 2.0). Results and what's left by hand: `CHECKLIST.md` → *Step 9 results*.
 
 ## Run it
 
@@ -18,7 +18,7 @@ npm run dev -- --host --port 5174
 
 - Site: **field-skin** (Netlify account "Zazzy Gfx"), site ID `266ea379-c86c-4914-b0b8-0c2d0d64460f`.
 - Current **draft**: https://6af5eb1e5cfd32b4567b639b--field-skin.netlify.app (needs a Netlify login to view).
-- So far drafts only: `npm run build && npx netlify-cli deploy --dir dist`. Production (`--prod`) waits for step 8.
+- Production: `npm run build && npx netlify-cli deploy --prod --dir dist`. Drafts (no `--prod`) still need a Netlify login; production is public.
 
 ## Figma
 

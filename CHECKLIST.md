@@ -64,7 +64,8 @@ Deadline: **Mon Nov 16, 2026, 11:59 pm PST** (Tue Nov 17, 8:59 am Lagos). Aim to
 ## Step 9 results (12 Nov 2026)
 
 - **axe-core 4:** 0 violations on the site (desktop 1440 with all players mounted, phone 390 touch) and on the player page. Screenshots: `docs/audit/axe-*.png`; raw results: `docs/audit/audit.json`.
-- **Lighthouse 12** (production build): mobile Performance 98, desktop 97; Accessibility, Best Practices and SEO 100 on both. Reports: `docs/audit/lighthouse-*.html`.
+- **Live:** https://field-skin.netlify.app (public) · **Repo:** https://github.com/zazzygfx/field-skin (public, Apache 2.0). Lighthouse on the live site: mobile 93 / desktop 90 performance, 100 accessibility, best practices and SEO.
+- **Lighthouse 12** (local production build): mobile Performance 98, desktop 97; Accessibility, Best Practices and SEO 100 on both. Reports: `docs/audit/lighthouse-*.html`.
 - **Keyboard-only:** 79 Tab stops through the whole site, every one with a visible focus ring (the seek needle's ring is drawn on the whole strip); K plays, L skips 10 s on the focused player.
 - **Reduced motion:** no theme tour, transitions cut to ~0. **Reduced transparency:** Liquid turns solid (no backdrop blur). **Forced colours:** keys and desk stay drawn (`docs/audit/forced-colors-*.png`).
 - **Captions:** cue times set from the soundtrack's loudness (0.25 s steps), the storyboard frame at each moment and Mux's auto-generated track. Not listened to by ear — worth one watch with sound before the Contra post.

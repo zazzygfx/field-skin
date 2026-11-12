@@ -110,10 +110,12 @@
   --field-shadow: 0 2px 0 rgb(0 0 0 / .6);
 }
 
-/* ---------- Size steps (container queries on the player) ---------- */
-@container field (max-width: 899px) { .field { --field-inset: 20px; } }
-@container field (max-width: 599px) { .field { --field-inset: 14px; } }
-@container field (max-width: 399px) { .field { --field-inset: 10px; --field-play-size: 52px; } }
+/* ---------- Size steps (container queries on the player) ----------
+ * A container can't query itself, so the steps are set on the player's
+ * children and inherited from there. */
+@container field (max-width: 899px) { .field > * { --field-inset: 20px; } }
+@container field (max-width: 599px) { .field > * { --field-inset: 14px; } }
+@container field (max-width: 399px) { .field > * { --field-inset: 10px; --field-play-size: 52px; } }
 
 /* ---------- System preferences ---------- */
 @media (prefers-reduced-transparency: reduce) {

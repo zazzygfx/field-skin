@@ -67,7 +67,12 @@ Reference images live in `reference/`. Numbers here are CSS pixels at 1×.
 | **S** | 400–599 | counter (`MM:SS`) · volume | captions · settings · fullscreen | ±10 become double-tap left/right thirds |
 | **XS** | < 400 | volume | captions · more | play key 52px; fullscreen moves into More |
 
-Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-sizes.png`.
+Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-sizes.png`, Figma 180:861 (phone sideways, M) and 180:968 (phone upright, XS).
+
+- Thumb-wheel width: 300 (XL) · 240 (M ≥ 800, phone sideways) · 220 (M) · 180 (S, XS). At S and XS the right pill steps aside (fades out) while the wheel is open.
+- Strip → key row gap: 13 (XL) · 11 (M) · 10 (S) · 8 (XS). Chip hidden at S and XS.
+- At M and smaller, Settings gains a **Speed** chip row and a **Picture-in-picture** row; at XS the key is labelled **More** and also holds **Fullscreen**.
+- The size steps are container queries on the player; they are set on the player's children (a container can't query itself).
 
 ---
 

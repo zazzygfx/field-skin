@@ -96,8 +96,8 @@
 /* ---------- Title chip ---------- */
 .field .field-chip {
   position: absolute;
-  top: var(--field-inset);
-  left: var(--field-inset);
+  top: max(var(--field-inset), env(safe-area-inset-top));
+  left: max(var(--field-inset), env(safe-area-inset-left));
   z-index: 2;
   display: flex;
   align-items: center;
@@ -132,12 +132,12 @@
 }
 .field .field-controls-content {
   position: absolute;
-  left: var(--field-inset);
-  right: var(--field-inset);
-  bottom: calc(var(--field-inset) - 1px);   /* pill bottom 637 of 664 */
+  left: max(var(--field-inset), env(safe-area-inset-left));
+  right: max(var(--field-inset), env(safe-area-inset-right));
+  bottom: max(calc(var(--field-inset) - 1px), env(safe-area-inset-bottom));   /* pill bottom 637 of 664 */
   display: flex;
   flex-direction: column;
-  gap: 13px;                                 /* strip bottom 564 → pills 577 */
+  gap: var(--field-row-gap, 13px);           /* strip bottom 564 → pills 577 */
 }
 .field .field-controls-content > * { pointer-events: auto; }
 .field .field-tooltip-group { display: contents; }
@@ -257,7 +257,7 @@
 .field .field-speed-label { display: block; line-height: 1; }
 .field .field-speed-ticks { display: flex; gap: 2px; }
 .field .field-speed-ticks > i {
-  width: 3px;
+  width: 2px;
   height: 2px;
   border-radius: 1px;
   background: var(--field-ink-18);
@@ -288,7 +288,7 @@
   min-width: var(--field-play-size);
   height: var(--field-play-size);
   padding: 0;
-  border-radius: 15px;
+  border-radius: calc(var(--field-play-size) * 15 / 58);
   overflow: hidden;
 }
 .field .field-play .field-icon {
@@ -443,7 +443,8 @@
   font-family: var(--field-font);
   transition:
     opacity var(--field-menu) var(--field-ease),
-    scale var(--field-menu) var(--field-ease);
+    scale var(--field-menu) var(--field-ease),
+    transform 220ms var(--field-ease);
 }
 .field [data-popup][data-starting-style],
 .field [data-popup][data-ending-style] { opacity: 0; scale: .92; }
@@ -718,8 +719,6 @@
 
 /* ---------- Volume key + thumb-wheel (Figma 178:886 / 180:629) ---------- */
 .field { --field-wheel-w: 300px; }
-@container field (max-width: 899px) { .field { --field-wheel-w: 220px; } }
-@container field (max-width: 399px) { .field { --field-wheel-w: 180px; } }
 
 .field .field-vol-num { display: none; font: 700 18px/1 var(--field-mono); }
 .field[data-field-vol-number] .field-vol {
@@ -960,6 +959,153 @@
 /* Counter digits roll while scrubbing */
 .field .field-counter { overflow: hidden; }
 .field .field-digit { display: inline-block; }
+
+/* ---------- Menu: speed chips + More rows (M and smaller) ---------- */
+.field .field-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.field .field-chip-option {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--field-edge);
+  border-radius: 9px;
+  background: var(--field-key);
+  font: 700 13px/normal var(--field-font);
+  font-variation-settings: "opsz" 14;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+}
+.field .field-chip-option[aria-checked="true"] {
+  border-color: var(--field-accent-edge);
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+}
+.field .field-chip-option:focus-visible,
+.field .field-chip-option[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field .field-option[hidden] { display: none; }
+
+/* ---------- Fluid sizes (SPEC §3, Figma 180:861 / 180:968) — keys fold away, never shrink ---------- */
+/* M 600–899: speed + PiP move into Settings */
+@container field (max-width: 899px) {
+  .field > * { --field-wheel-w: 220px; --field-row-gap: 11px; }
+  .field .field-pill-right .field-speed,
+  .field .field-pill-right media-pip-button,
+  .field .field-tray { display: none; }
+}
+@container field (min-width: 800px) and (max-width: 899px) {
+  .field > * { --field-wheel-w: 240px; }          /* phone sideways, 180:861 */
+}
+/* S 400–599: ±10 become double-tap thirds; counter MM:SS; no chip */
+@container field (max-width: 599px) {
+  .field > * { --field-wheel-w: 180px; --field-row-gap: 10px; }
+  .field .field-pill-left media-seek-button { display: none; }
+  .field .field-chip { display: none; }
+  /* captions + more step aside while you roll (180:968) */
+  .field[data-field-wheel] .field-pill-right { opacity: 0; pointer-events: none; }
+  .field .field-scrub-frame { min-width: 160px; max-width: 160px; min-height: 90px; max-height: 90px; }
+  .field .field-scrub-preview { bottom: calc(100% - var(--track-y) + 24px + 30px + 6px); }
+}
+/* XS < 400: volume · captions · more · play (52px) */
+@container field (max-width: 399px) {
+  .field > * { --field-row-gap: 8px; }
+  .field .field-counter,
+  .field .field-pill-right media-fullscreen-button { display: none; }
+  .field .field-bigplay { --field-play-size: 72px; --play-k: 1.2414; }
+  .field .field-ready-title { font-size: 15px; }
+  .field .field-scrub-tag { font-size: 12px; padding: 4px 6px; }
+}
+
+/* ---------- Double-tap seek: ripple on that side + accent bubble (touch) ---------- */
+.field .field-seek-ripple {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 34%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 0 50% 50% 0 / 0 100% 100% 0;
+  background: radial-gradient(circle at 30% 50%, color-mix(in srgb, var(--field-paper) 26%, transparent), transparent 70%);
+  transition: opacity var(--field-hide) ease-out;
+}
+.field .field-seek-ripple[data-direction="forward"] {
+  left: auto;
+  right: 0;
+  border-radius: 50% 0 0 50% / 100% 0 0 100%;
+  background: radial-gradient(circle at 70% 50%, color-mix(in srgb, var(--field-paper) 26%, transparent), transparent 70%);
+}
+.field .field-seek-ripple[data-open] { opacity: 1; transition-duration: var(--field-show); }
+.field .field-seek-bubble {
+  padding: 6px 10px;
+  border: 1px solid var(--field-accent-edge);
+  border-radius: 8px;
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+  font: 700 13px/normal var(--field-mono);
+  box-shadow: var(--field-shadow);
+}
+.field .field-seek-ripple[data-direction="forward"] .field-seek-bubble::before { content: "+"; }
+.field .field-seek-ripple[data-direction="backward"] .field-seek-bubble::before { content: "−"; }
+@media (pointer: fine) { .field .field-seek-ripple { display: none; } }
+
+/* ---------- Phone sheets (SPEC §8): Settings/More becomes an M3 sheet ---------- */
+@media (pointer: coarse) {
+  .field .field-menu::backdrop { background: rgb(18 18 15 / .4); }
+  .field .field-menu .field-option,
+  .field .field-menu .field-row-item { height: 48px; }
+}
+/* Upright: bottom sheet — 28px top radius, 32 × 4 handle, scrim 40% */
+@media (pointer: coarse) and (orientation: portrait) {
+  .field .field-menu {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    width: 100% !important;
+    max-width: none;
+    max-height: 75svh;
+    padding: 22px 16px calc(16px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 28px 28px 0 0;
+    translate: none !important;          /* drop Video.js's anchor clamp: sheets are full width */
+    transform-origin: 50% 100%;
+  }
+  .field .field-menu::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 32px;
+    height: 4px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: var(--field-ink-30);
+  }
+  .field .field-menu[data-starting-style],
+  .field .field-menu[data-ending-style] { scale: 1; transform: translateY(24px); }
+}
+/* Sideways: side sheet from the right — 300 wide, left radius 24 */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+  .field .field-menu {
+    position: fixed !important;
+    inset: 0 0 0 auto !important;
+    width: 300px !important;
+    max-height: none;
+    height: 100%;
+    padding: 16px;
+    padding-right: max(16px, env(safe-area-inset-right));
+    border-width: 0 0 0 1px;
+    border-radius: 24px 0 0 24px;
+    translate: none !important;
+    transform-origin: 100% 50%;
+  }
+  .field .field-menu[data-starting-style],
+  .field .field-menu[data-ending-style] { scale: 1; transform: translateX(24px); }
+}
 
 /* ---------- Reduced motion: no translate, no scale; fades only ---------- */
 @media (prefers-reduced-motion: reduce) {

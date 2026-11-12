@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — step 3</title>
+  <title>FIELD — step 4</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
@@ -21,10 +21,15 @@
       color: #17160F;
       font-family: "DM Sans", system-ui, sans-serif;
     }
-    main { width: min(1180px, 100% - 32px); margin: 48px auto; }
+    main { width: min(var(--stage-w, 1180px), 100% - 32px); margin: 48px auto; }
     .stage video-player { display: block; }
         .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
   </style>
+  <script>
+    // dev: ?w=364 sets the player width (XL 1180 · M 846 · S 500 · XS 364)
+    const w = new URLSearchParams(location.search).get('w');
+    if (w) document.documentElement.style.setProperty('--stage-w', parseInt(w, 10) + 'px');
+  </script>
   <script type="module" src="/src/main.ts"></script>
 </head>
 <body>
@@ -162,6 +167,14 @@
 
               <media-menu id="field-settings-1" class="field-menu" side="top" align="end">
                 <media-menu-content class="field-menu-content">
+                  <media-menu-group class="field-group field-group-speed">
+                    <media-menu-group-label class="field-group-label">Speed</media-menu-group-label>
+                    <media-playback-rate-radio-group class="field-chips">
+                      <template>
+                        <media-menu-radio-item class="field-chip-option"><span data-part="label"></span></media-menu-radio-item>
+                      </template>
+                    </media-playback-rate-radio-group>
+                  </media-menu-group>
                   <media-menu-group class="field-group field-group-quality">
                     <media-menu-group-label class="field-group-label">Quality · from the stream</media-menu-group-label>
                     <media-quality-radio-group class="field-options">
@@ -183,6 +196,10 @@
                         </media-menu-radio-item>
                       </template>
                     </media-captions-radio-group>
+                  </media-menu-group>
+                  <media-menu-group class="field-group field-group-more">
+                    <media-menu-item class="field-option field-more-pip" data-field-proxy="field-pip-1"><span>Picture-in-picture</span><span class="field-option-value">P</span></media-menu-item>
+                    <media-menu-item class="field-option field-more-fs" data-field-proxy="field-fs-1"><span>Fullscreen</span><span class="field-option-value">F</span></media-menu-item>
                   </media-menu-group>
                   <media-menu-group class="field-group">
                     <media-menu-group-label class="field-group-label">Key sounds</media-menu-group-label>
@@ -215,11 +232,14 @@
           <media-hotkey keys="p" action="togglePictureInPicture"></media-hotkey>
           <media-gesture type="tap" action="togglePaused" pointer="mouse" region="center"></media-gesture>
           <media-gesture type="tap" action="toggleControls" pointer="touch"></media-gesture>
+          <media-gesture type="doubletap" action="seekStep" value="-10" region="left" pointer="touch"></media-gesture>
+          <media-gesture type="doubletap" action="seekStep" value="10" region="right" pointer="touch"></media-gesture>
+          <media-seek-indicator class="field-seek-ripple" aria-hidden="true"><media-seek-indicator-value class="field-seek-bubble"></media-seek-indicator-value></media-seek-indicator>
           <media-status-announcer class="field-sr"></media-status-announcer>
         </media-container>
       </video-player>
     </div>
-    <p class="note">Step 3 · signature motion · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <p class="note">Step 4 · fluid sizes + phone. Try ?w=846, ?w=500, ?w=364. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
   </main>
 </body>
 </html>

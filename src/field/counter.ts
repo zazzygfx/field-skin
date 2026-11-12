@@ -11,6 +11,12 @@ export function formatCounter(seconds: number): string {
   return `${pad(seconds / 3600)} ${pad((seconds % 3600) / 60)} ${pad(seconds % 60)}`;
 }
 
+/** S size: `MM:SS`. */
+export function formatShort(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '--:--';
+  return `${pad(seconds / 60)}:${pad(seconds % 60)}`;
+}
+
 /**
  * Writes the counter one character per span. With `roll`, digits that change
  * roll in from above like a tape counter (off under reduced motion).

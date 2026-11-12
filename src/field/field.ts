@@ -46,8 +46,12 @@ import '@videojs/html/ui/menu-item-indicator';
 import '@videojs/html/ui/quality-radio-group';
 import '@videojs/html/ui/captions-radio-group';
 import '@videojs/html/ui/slider-thumbnail';
+import '@videojs/html/ui/menu-item';
+import '@videojs/html/ui/playback-rate-radio-group';
+import '@videojs/html/ui/seek-indicator';
+import '@videojs/html/ui/seek-indicator-value';
 import { KeySounds } from './sounds';
-import { formatCounter, renderCounter } from './counter';
+import { formatCounter, formatShort, renderCounter } from './counter';
 import { mountVolume } from './volume';
 import { mountSpeed } from './speed';
 import { mountScrub, type Chapter } from './scrub';
@@ -88,6 +92,32 @@ export function mountField(root: HTMLElement): void {
     shadow.append(style);
   }
 
+  /* ---------- Size steps (SPEC §3): mirrors the container queries for the JS bits ---------- */
+  type Size = 'xl' | 'm' | 's' | 'xs';
+  let size: Size = 'xl';
+  const settingsKey = root.querySelector<HTMLElement>('.field-settings');
+  const sizeOf = (w: number): Size => (w >= 900 ? 'xl' : w >= 600 ? 'm' : w >= 400 ? 's' : 'xs');
+  const applySize = (width: number) => {
+    const next = sizeOf(width);
+    if (next === size && root.hasAttribute('data-field-size')) return;
+    size = next;
+    root.setAttribute('data-field-size', size);
+    // XS: the settings key becomes "More" (fullscreen moves inside it)
+    settingsKey?.setAttribute('aria-label', size === 'xs' ? 'More' : 'Settings');
+    // menu rows that only exist at smaller sizes (hidden attr so menu arrows skip them)
+    const q = (sel: string) => root.querySelector<HTMLElement>(sel);
+    const speedGroup = q('.field-group-speed');
+    const pipRow = q('.field-more-pip');
+    const fsRow = q('.field-more-fs');
+    const moreGroup = q('.field-group-more');
+    if (speedGroup) speedGroup.hidden = size === 'xl';
+    if (pipRow) pipRow.hidden = size === 'xl';
+    if (fsRow) fsRow.hidden = size !== 'xs';
+    if (moreGroup) moreGroup.hidden = size === 'xl';
+    render();
+  };
+  new ResizeObserver(([entry]) => applySize(entry.contentRect.width)).observe(root);
+
   /* ---------- Counter + chip ---------- */
   let chapters: Chapter[] = [];
   let scrubTime: number | null = null;
@@ -97,7 +127,15 @@ export function mountField(root: HTMLElement): void {
     const t = media.currentTime;
     const d = media.duration;
     const ready = media.readyState >= 1 && Number.isFinite(d) && d > 0;
-    const text = ready && (!loading || scrubTime !== null) ? formatCounter(scrubTime ?? t) : '-- -- --';
+    const short = size === 's' || size === 'xs'; // S size: MM:SS
+    const text =
+      ready && (!loading || scrubTime !== null)
+        ? short
+          ? formatShort(scrubTime ?? t)
+          : formatCounter(scrubTime ?? t)
+        : short
+          ? '--:--'
+          : '-- -- --';
     if (counter) renderCounter(counter, text, scrubTime !== null);
     if (length && ready) length.textContent = `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
     root.style.setProperty('--field-progress', ready ? `${(t / d) * 100}%` : '0%');
@@ -252,6 +290,14 @@ export function mountField(root: HTMLElement): void {
     },
   );
 
+  /* ---------- More rows (M and smaller): PiP / fullscreen proxy the real keys ---------- */
+  for (const row of root.querySelectorAll<HTMLElement>('[data-field-proxy]')) {
+    row.addEventListener('click', () => {
+      const target = document.getElementById(row.dataset.fieldProxy!);
+      target?.click();
+    });
+  }
+
   /* ---------- Hint bar: after the first keyboard action, 4 s (SPEC §9) ---------- */
   let hinted = false;
   root.addEventListener('keydown', (e) => {
@@ -264,4 +310,6 @@ export function mountField(root: HTMLElement): void {
       setTimeout(() => (hints.hidden = true), 400);
     }, 4000);
   });
+
+  applySize(root.getBoundingClientRect().width);
 }

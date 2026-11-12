@@ -24,8 +24,8 @@ Deadline: **Mon Nov 16, 2026, 11:59 pm PST** (Tue Nov 17, 8:59 am Lagos). Aim to
 
 ## FIELD-specific
 
-- [ ] Play key meter (no ring); chapters segmented, continuous when none
-- [ ] Volume thumb-wheel opens **in place** in the left pill; tap = mute; iPhone = mute only
+- [ ] Play key icon only (no ring, no meter); dims while loading; big 96px key when paused
+- [ ] Volume level meter opens **in place** in the left pill; tap = mute; closes on idle/leave/Esc/outside; iPhone = mute only
 - [ ] Speed click-cycle + hold tray
 - [ ] Seek hover ghost needle + tag + storyboard preview
 - [ ] Pause shelf with chapters / quick-jump fallback

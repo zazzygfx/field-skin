@@ -69,7 +69,6 @@
               <span class="field-icon" data-icon="pause"></span>
               <span class="field-icon" data-icon="play"></span>
               <span class="field-icon" data-icon="replay"></span>
-              <span class="field-meter" aria-hidden="true"></span>
             </media-play-button>
             <div class="field-ready">
               <p class="field-ready-title">Caminandes 3: Llamigos</p>
@@ -116,10 +115,13 @@
                     <span class="field-vol-num" aria-hidden="true"></span>
                   </media-mute-button>
                   <media-tooltip trigger="field-mute-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <div class="field-wheel" role="slider" tabindex="-1" aria-label="Volume" aria-valuemin="0" aria-valuemax="10" hidden>
-                    <div class="field-wheel-slot"><div class="field-wheel-drum"></div><div class="field-wheel-ribs"></div></div>
-                    <div class="field-wheel-index"></div>
-                    <div class="field-wheel-detents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="field-level" role="slider" tabindex="-1" aria-label="Volume" aria-valuemin="0" aria-valuemax="10" hidden>
+                    <div class="field-level-slot">
+                      <div class="field-level-track">
+                        <div class="field-level-segs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                        <div class="field-level-needle" aria-hidden="true"></div>
+                      </div>
+                    </div>
                   </div>
                   <media-seek-button class="field-key" id="field-fwd-1" seconds="10" label="Forward 10 seconds" aria-keyshortcuts="L">+10</media-seek-button>
                   <media-tooltip trigger="field-fwd-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
@@ -132,7 +134,10 @@
                     <span class="field-icon" data-icon="captions"></span>
                   </media-captions-button>
                   <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5" aria-haspopup="true" aria-expanded="false"></media-playback-rate-button>
+                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5" aria-haspopup="true" aria-expanded="false">
+                    <span class="field-speed-label" aria-hidden="true">1×</span>
+                    <span class="field-speed-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  </media-playback-rate-button>
                   <div class="field-tray" role="radiogroup" aria-label="Playback speed" hidden></div>
                   <media-tooltip trigger="field-speed-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
                   <media-pip-button class="field-key field-key-icon" id="field-pip-1" aria-keyshortcuts="P">
@@ -154,8 +159,7 @@
                   <span class="field-icon" data-icon="pause"></span>
                   <span class="field-icon" data-icon="play"></span>
                   <span class="field-icon" data-icon="replay"></span>
-                  <span class="field-meter" aria-hidden="true"></span>
-                </media-play-button>
+                    </media-play-button>
                 <media-tooltip trigger="field-play-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
               </div>
 

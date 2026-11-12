@@ -22,11 +22,27 @@ export function mountSpeed(
   const tray = root.querySelector<HTMLElement>('.field-tray');
   if (!key || !tray) return;
 
-  /* ---------- Label crossfade (140 ms) whenever data-rate changes ---------- */
-  new MutationObserver(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    key.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease-out', pseudoElement: '::before' });
-  }).observe(key, { attributes: true, attributeFilter: ['data-rate'] });
+  /* ---------- Label + 7 ticks, driven by the media rate (not Video.js's data-rate,
+     which is rewritten on every state update). Crossfade only on a real change. ---------- */
+  const label = key.querySelector<HTMLElement>('.field-speed-label');
+  const ticks = Array.from(key.querySelectorAll<HTMLElement>('.field-speed-ticks > i'));
+  let shownRate = NaN;
+  const syncKey = () => {
+    const rate = media.playbackRate;
+    if (rate === shownRate) return;
+    const first = Number.isNaN(shownRate);
+    shownRate = rate;
+    if (label) label.textContent = `${rate}×`;
+    const idx = TRAY_RATES.indexOf(rate);
+    ticks.forEach((t, i) => t.toggleAttribute('data-on', i <= idx));
+    if (!first && label && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      label.getAnimations().forEach((a) => a.cancel());
+      label.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 140, easing: 'ease-out' });
+    }
+  };
+  media.addEventListener('ratechange', syncKey);
+  media.addEventListener('loadedmetadata', syncKey);
+  syncKey();
 
   /* ---------- Tray keys ---------- */
   const buttons = TRAY_RATES.map((r) => {

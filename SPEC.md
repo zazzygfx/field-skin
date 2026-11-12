@@ -9,6 +9,8 @@ Reference images live in `reference/`. Numbers here are CSS pixels at 1×.
 ## 1. Principles
 
 1. **Hardware, not glass.** Solid keys, 1px edge, a 2px hard shadow (`0 2px 0`). No blur in the default material.
+
+> **Overrides (designer, 12 Nov 2026):** these supersede Figma where they differ — the play keys are icon-only (no progress meter); the speed key always shows its label with 7 ticks under it; volume opens as a 10-segment level meter (not a ribbed thumb-wheel).
 2. **One accent.** It marks played time and the active choice. Nothing else is accent-coloured.
 3. **Left = where, right = what.** Left pill: counter, −10, volume, +10. Right pill: captions, speed, PiP, settings, fullscreen. Play key far right, under the right thumb.
 4. **Feedback at the source.** Bubbles, the wheel, the tray and menus grow out of the key that was pressed.
@@ -39,7 +41,7 @@ Reference images live in `reference/`. Numbers here are CSS pixels at 1×.
 | Key | **48 × 48**, radius 10 | M3 minimum target. Label keys (−10, +10, 1.5×) min-width 48, padding 0 10 |
 | Pill | padding 5 6, gap 6, radius 14 | background `--field-pill`, 1px `--field-edge`, hard shadow |
 | Counter | height 48, padding 0 10, radius 8 | `--field-counter` bg, mono 15px, tracking 4%, **always `HH MM SS`** so width never jumps (S size: `MM:SS`) |
-| Play key | **58 × 58**, radius 25% (≈14) | progress meter inside — see §5 |
+| Play key | **58 × 58**, radius 15 | icon only — see §5 |
 | Pill ↔ play key gap | 8 | |
 | Tape strip | height 26, radius 13, sits 12px above the key row, full inner width | **44px hit band** (invisible padding) |
 | Title chip | padding 6 12 6 8, radius 9 | chapter badge only when chapters exist |
@@ -79,37 +81,34 @@ Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-si
 
 ---
 
-## 5. Play key (no ring — progress lives inside the key)
+## 5. Play key (icon only — no ring, no meter)
 
-- 58 × 58, radius 14, `--field-key`, 1px edge, hard shadow. Icon 40% of key, centred, nudged up 6%.
-- **Meter:** 56% of key width, 3px tall, 20% from the bottom. Chapter segments (1px gaps) filled with `--field-accent` up to current time. No chapters → one continuous line. See `reference/02-play-key.png`.
-- States: Pause · Play · Replay (meter full) · Loading (meter shows a sweeping segment) · Focus.
+- 58 × 58, radius 15, `--field-key`, 1px edge, hard shadow. Icon only, centred (Figma glyph sits 1px left of centre, 13px from the top). Progress is shown by the strip and the idle rail, not the key.
+- States: Pause · Play · Replay (ended) · Loading/Buffering (the icon dims to 40%; the counter reads `-- -- --`) · Focus.
+- **Big centred key:** 96 × 96 with the same icons, centred on the picture whenever the video is paused (not ended). Before the first play (Ready) it also shows the title and length under it, and nothing else is on the picture.
 - **Press (tape-transport):**
   1. 0–80 ms: key sinks 2px (`translateY(2px)`, shadow → 0, 12% ink layer); pause bars slide together.
   2. 80–180 ms: bars become the triangle as the key rises. Easing `cubic-bezier(.2,0,0,1)`.
-  3. On pause: the meter flashes once (white 60% → 0, 300 ms) so you see where you stopped.
 - Hover: lift 1px, 8% layer. Reduced motion: no translate, instant icon swap.
 
 ---
 
-## 6. Volume thumb-wheel (signature)
-
-See `reference/03-motion.png` (A) and `reference/04-volume-in-place.png`.
+## 6. Volume level meter (signature)
 
 - **Where:** it opens **inside the left pill, at the volume key**. While open, −10 and +10 fold away; the counter stays; the pill widens to the right into the empty middle. Right pill and play key never move.
 - **Open:** click/tap the volume key and hold ≥ 250 ms, **or** press ↑/↓, **or** hover 400 ms (pointer). Plain tap = **mute / unmute**.
-- **Wheel:** 300 × 48 at XL (220 at M, 180 at XS). Ink slot (radius 9, inner shadow) holding a **drum**: horizontal gradient `--field-drum-lo → --field-drum-hi → --field-drum-lo`, with ~26 ribs whose spacing follows a cylinder (dense at the edges, fading out). Accent **index line** in the centre. **10 detent bars** under the slot, filled with accent up to the level.
-- **Input:** drag sideways on the wheel (1 detent per 24px), mouse wheel / trackpad, ↑/↓ (±1), PageUp/PageDown (±3). Each detent: ribs shift by one, key does a 1-frame sink, optional 8 ms vibration on Android.
+- **Meter:** 300 wide at XL (220 at M, 180 at XS). An ink slot (`--field-counter`, radius 9, 36 tall) holding **10 segments** — rounded bars with 4px gaps — lit `--field-accent` up to the level; empty segments are `--field-counter-text` at 18% (ink at 18% would vanish on the ink slot). On top, **the timeline's needle** (3 × 24, `--field-ink`, with a 1px `--field-key` edge so it reads on the slot) sits at the level. No arrows, no drum.
+- **Input:** click anywhere on the slot to jump to that step; drag the needle; mouse wheel / trackpad; ↑/↓ (±1); on the focused meter also ←/→ (±1), PageUp/PageDown (±3), Home/End. Each step: a tiny tick (if Key sounds are on), the key number updates, optional 8 ms vibration on Android.
 - **Key shows the level:** while open, the volume key turns accent and shows the number `0–10` in mono 18px. At 0 the key turns `--field-counter` (muted).
-- **Close:** 1.5 s after the last input the wheel rolls back into the key (220 ms); the number stays 600 ms, then the speaker icon returns.
+- **Close:** 1.5 s after the last input, 600 ms after the pointer leaves the pill, on Esc, or on a click outside. The meter slides back into the key (220 ms) and −10/+10 return; the number stays 600 ms, then the speaker icon returns.
 - `role="slider"`, `aria-valuemin=0`, `aria-valuemax=10`, `aria-valuetext="Volume 7 of 10"`.
-- **iPhone:** browsers can't set volume. Hide the wheel; the key only mutes. Desktop + Android get the wheel.
+- **iPhone:** browsers can't set volume. No meter; the key only mutes. Desktop + Android get the meter.
 
 ---
 
 ## 7. Speed
 
-- **Click/tap** cycles: 1 → 1.25 → 1.5 → 2 → 0.5 → 1. Label crossfades (140 ms). A row of **7 tiny ticks** inside the key shows the position.
+- **Click/tap** cycles: 1 → 1.25 → 1.5 → 2 → 0.5 → 1. The label (`1×`, `1.25×`, …) is **always visible**; it crossfades (140 ms) only when the speed actually changes. A row of **7 tiny ticks** sits under the label inside the key (accent up to the current speed's position in 0.5–2); the ticks never cover the label.
 - **Hold (≥ 350 ms) or `<` `>`** opens the **tray**: 7 keys (0.5, 0.75, 1, 1.25, 1.5, 1.75, 2) growing out of the speed key, active one in accent. One tap each. Esc closes.
 - At M and smaller, speed lives in Settings / More as chips.
 
@@ -151,25 +150,25 @@ All grow from the key that opened them: `transform-origin` = that key, `scale(.9
 
 | # | State | What it looks like |
 |---|---|---|
-| 01 | Ready | Big play key (120px) centred, title + length under it. Nothing else. |
-| 02 | Loading | Meter sweep inside the play key; counter reads `-- -- --`. |
+| 01 | Ready | Big play key (96px) centred, title + length under it. Nothing else. |
+| 02 | Loading | Play-key icon dims to 40%; counter reads `-- -- --`. |
 | 03 | Scrubbing | Frame preview + time + chapter; counter rolls. |
 | 04 | Seek ±10 | Accent bubble grows from the pressed key: `+10s → 01:33`. Double-tap sides on touch. |
-| 05 | Volume | Wheel open in place (§6). |
+| 05 | Volume | Level meter open in place (§6). |
 | 06 | Muted | Volume key turns `--field-counter`; bubble `Muted · tap to unmute`. |
 | 07 | Speed | Tray open from the speed key. |
 | 08 | Captions on | Captions key accent. Cue box: ink 86%, cream text, sits **above the strip** and rises when controls show. |
 | 09 | No captions | Captions key at 38% + tooltip `No captions for this video`. |
 | 10 | Keyboard | Focus ring + tooltip + hint bar. |
-| 11 | Buffering | Meter sweep; strip keeps the real position. |
-| 12 | Ended | Meter full, key = Replay, `Watch again?` centred. |
+| 11 | Buffering | Play-key icon dims to 40%, counter `-- -- --`; strip keeps the real position. |
+| 12 | Ended | Key = Replay icon, `Watch again?` centred. |
 | 13 | Error | Card: `Can’t play this video` / `The stream stopped responding. Check your connection and try again.` / **Try again**. Controls dim to 30%. |
 | 14 | Live | Counter shows ● `LIVE`; strip = DVR window, needle at the edge; +10 disabled at the edge. |
 | 15 | Behind live | Counter `−00 00 42`; accent **Go to live** chip next to the title chip. |
 | 16 | Long video | Counter stays `HH MM SS` (e.g. `01 47 09`). |
 | 17 | PiP active | Picture dims; `Playing in picture-in-picture` + **Bring it back here**. |
 | 18 | More contrast | Solid white pills, 2px ink edges on keys and strip. |
-| 19 | No chapters | Strip + key meter become single lines; chip shows title only. |
+| 19 | No chapters | Strip becomes a single line; chip shows title only. |
 | 20 | Calm | Reduced motion / transparency / contrast / forced colours — see §13. |
 
 ---
@@ -209,9 +208,9 @@ Tokens in `tokens.css`. Set on the player: `data-field-theme="putty|ink|liquid|h
 |---|---|---|---|---|
 | Controls show/hide | pointer, tap, key · 2 s idle | opacity | 180 in · 300 out · ease-out | same |
 | Key press | pointer / touch / Space | translateY 2px, shadow 0, 12% layer | 90 down · 140 up | layer only |
-| Play ↔ pause | click, K, Space | bars → triangle, meter flash | 180 · `cubic-bezier(.2,0,0,1)` | instant swap |
-| Volume wheel | hold volume, ↑↓, scroll | pill width + wheel clip; ribs per detent | 220 open · 1.5 s idle close | opens in place |
-| Speed | click / hold | label crossfade, ticks; tray grows | 140 · tray 200 | instant |
+| Play ↔ pause | click, K, Space | bars → triangle | 180 · `cubic-bezier(.2,0,0,1)` | instant swap |
+| Volume meter | hold volume, ↑↓, scroll | pill width + meter clip; segments light, needle moves | 220 open/close · 1.5 s idle · 600 ms after leave | opens in place |
+| Speed | click / hold | label crossfade (on change only), ticks; tray grows | 140 · tray 200 | instant |
 | Menus & sheets | settings, more, pause | scale .92→1 from key + fade; sheets slide 24px | 180 · 220 | fade only |
 | Seek hover / scrub | pointer, drag, J/L | ghost needle + tag; counter digits roll | 1:1 with pointer | digits change |
 

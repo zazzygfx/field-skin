@@ -248,9 +248,23 @@
 .field media-fullscreen-button[data-fullscreen] [data-icon="fullscreen"] { display: none; }
 .field media-fullscreen-button[data-fullscreen] [data-icon="fullscreen-exit"] { display: block; }
 
-/* Speed key label straight from Video.js data-rate */
-.field .field-speed::before { content: attr(data-rate) "×"; }
-.field .field-speed:not([data-rate])::before { content: "1×"; }
+/* Speed key: label always visible, 7 ticks in a row under it (never over it) */
+.field .field-speed {
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+.field .field-speed-label { display: block; line-height: 1; }
+.field .field-speed-ticks { display: flex; gap: 2px; }
+.field .field-speed-ticks > i {
+  width: 3px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--field-ink-18);
+}
+.field .field-speed-ticks > i[data-on] { background: var(--field-accent); }
+.field .field-speed[aria-expanded="true"] .field-speed-ticks > i { background: color-mix(in srgb, var(--field-on-accent) 35%, transparent); }
+.field .field-speed[aria-expanded="true"] .field-speed-ticks > i[data-on] { background: var(--field-on-accent); }
 
 /* ---------- Counter ---------- */
 .field .field-counter {
@@ -268,7 +282,7 @@
   user-select: none;
 }
 
-/* ---------- Play key: 58px, radius 15, meter inside (169:51) ---------- */
+/* ---------- Play key: 58px, radius 15, icon only ---------- */
 .field .field-play {
   width: var(--field-play-size);
   min-width: var(--field-play-size);
@@ -310,36 +324,8 @@
 .field .field-play[data-paused]:not([data-ended]) [data-icon="play"],
 .field .field-play[data-ended] [data-icon="replay"] { opacity: 1; scale: 1; }
 
-.field .field-meter {
-  position: absolute;
-  /* Figma: x 12, w 32, y 45 on the 58px key (outer box; we sit inside the 1px edge) */
-  left: calc(var(--field-play-size) * 12 / 58 - 1px);
-  width: calc(var(--field-play-size) * 32 / 58);
-  top: calc(var(--field-play-size) * 45 / 58 - 1px);
-  height: 3px;
-  border-radius: 1px;
-  background: linear-gradient(
-    to right,
-    var(--field-accent) var(--field-progress),
-    var(--field-ink-18) var(--field-progress)
-  );
-  pointer-events: none;
-}
-.field .field-play[data-ended] .field-meter { --field-progress: 100%; }
-
-/* On pause the meter flashes once so you see where you stopped */
-.field .field-meter::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: var(--field-paper);
-  opacity: 0;
-}
-.field .field-play[data-started][data-paused]:not([data-ended]) .field-meter::after {
-  animation: field-flash 300ms ease-out;
-}
-@keyframes field-flash { from { opacity: .6; } to { opacity: 0; } }
+/* Loading / buffering: the icon dims to 40% (no meter, no ring) */
+.field[data-field-loading] .field-play:not([data-paused]) [data-icon="pause"] { opacity: .4; }
 
 /* ---------- Tape strip (174:381) ---------- */
 .field .field-strip {
@@ -730,10 +716,10 @@
   visibility: hidden;
 }
 
-/* ---------- Volume key + thumb-wheel (178:886 / 180:629) ---------- */
-.field { --field-wheel-w: 300px; }
-@container field (max-width: 899px) { .field { --field-wheel-w: 220px; } }
-@container field (max-width: 399px) { .field { --field-wheel-w: 180px; } }
+/* ---------- Volume key + level meter (SPEC §6) ---------- */
+.field { --field-level-w: 300px; }
+@container field (max-width: 899px) { .field { --field-level-w: 220px; } }
+@container field (max-width: 399px) { .field { --field-level-w: 180px; } }
 
 .field .field-vol-num { display: none; font: 700 18px/1 var(--field-mono); }
 .field[data-field-vol-number] .field-vol {
@@ -748,103 +734,91 @@
 }
 .field[data-field-vol-number] .field-vol .field-icon { display: none; }
 .field[data-field-vol-number] .field-vol .field-vol-num { display: block; }
-.field .field-vol[data-field-sink] { translate: 0 2px; box-shadow: none; transition: none; }
 
-/* −10 / +10 fold away while rolling; the pill widens into the empty middle */
+/* −10 / +10 fold away while the meter is open; the pill widens into the empty middle */
 .field[data-field-wheel] .field-pill-left media-seek-button { display: none; }
 .field[data-field-wheel] .field-pill-left { padding-right: 10px; }
 
-.field .field-wheel {
+.field .field-level {
   position: relative;
   flex: none;
-  width: var(--field-wheel-w);
-  height: 48px;
+  width: var(--field-level-w);
+  height: var(--field-key-size);
   margin-left: 2px;
+  display: flex;
+  align-items: center;
   outline: none;
-  cursor: ew-resize;
+  cursor: pointer;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  animation: field-wheel-in var(--field-wheel) var(--field-ease);
+  animation: field-level-in var(--field-wheel) var(--field-ease);
 }
-.field .field-wheel[hidden] { display: none; }
-.field[data-field-wheel-closing] .field-wheel { animation: field-wheel-out var(--field-wheel) var(--field-ease) forwards; }
-@keyframes field-wheel-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-@keyframes field-wheel-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 100% 0 0); } }
+.field .field-level[hidden] { display: none; }
+/* opens out of the key; slides back into it on close */
+.field[data-field-wheel-closing] .field-level { animation: field-level-out var(--field-wheel) var(--field-ease) forwards; }
+@keyframes field-level-in { from { clip-path: inset(0 100% 0 0); translate: -12px 0; } to { clip-path: inset(0 0 0 0); translate: 0 0; } }
+@keyframes field-level-out { from { clip-path: inset(0 0 0 0); translate: 0 0; } to { clip-path: inset(0 100% 0 0); translate: -12px 0; } }
 
-.field .field-wheel-slot {
-  position: absolute;
-  inset: 0 0 auto 0;
+/* Ink slot, radius 9 */
+.field .field-level-slot {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
   height: 36px;
+  padding: 0 10px;
   border-radius: 9px;
-  overflow: hidden;
   background: var(--field-counter);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .45);
 }
-.field .field-wheel-slot::after {
-  content: "";
+.field .field-level-track { position: relative; height: 100%; }
+
+/* 10 rounded segments, 4px gaps: lit orange up to the level */
+.field .field-level-segs {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 2px 4px rgb(0 0 0 / .6);
-  pointer-events: none;
-}
-.field .field-wheel-drum {
-  position: absolute;
-  left: 5px;
-  right: 5px;
-  top: 3px;
-  height: 30px;
-  border-radius: 6px;
-  background: linear-gradient(to right, var(--field-drum-lo), var(--field-drum-hi), var(--field-drum-lo));
-}
-.field .field-wheel-ribs { position: absolute; inset: 0; }
-.field .field-wheel-ribs > i {
-  position: absolute;
-  top: 5px;
-  width: 1.5px;
-  height: 26px;
-  background: var(--field-counter);
-}
-.field .field-wheel-index {
-  position: absolute;
-  left: calc(50% - 1px);
-  top: -3px;
-  width: 2px;
-  height: 42px;
-  background: var(--field-accent);
-  pointer-events: none;
-}
-.field .field-wheel-detents {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 42px;
   display: flex;
+  align-items: center;
   gap: 4px;
 }
-.field .field-wheel-detents > i {
+.field .field-level-segs > i {
   flex: 1;
-  height: 3px;
-  border-radius: 1.5px;
+  height: 14px;
+  border-radius: 3px;
+  /* empty: --field-counter-text at 18% (ink 18% would vanish on the ink slot) */
   background: color-mix(
     in srgb,
     var(--field-accent) calc(clamp(0, var(--field-vol, 0) - var(--i) + 1, 1) * 100%),
-    color-mix(in srgb, var(--field-ink) 20%, transparent)
+    color-mix(in srgb, var(--field-counter-text) 18%, transparent)
   );
+  transition: background-color 90ms ease-out;
 }
-.field .field-wheel-detents > i:nth-child(1) { --i: 1; }
-.field .field-wheel-detents > i:nth-child(2) { --i: 2; }
-.field .field-wheel-detents > i:nth-child(3) { --i: 3; }
-.field .field-wheel-detents > i:nth-child(4) { --i: 4; }
-.field .field-wheel-detents > i:nth-child(5) { --i: 5; }
-.field .field-wheel-detents > i:nth-child(6) { --i: 6; }
-.field .field-wheel-detents > i:nth-child(7) { --i: 7; }
-.field .field-wheel-detents > i:nth-child(8) { --i: 8; }
-.field .field-wheel-detents > i:nth-child(9) { --i: 9; }
-.field .field-wheel-detents > i:nth-child(10) { --i: 10; }
-.field .field-wheel:focus-visible .field-wheel-slot {
-  box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper);
-  overflow: visible;
+.field .field-level-segs > i:nth-child(1) { --i: 1; }
+.field .field-level-segs > i:nth-child(2) { --i: 2; }
+.field .field-level-segs > i:nth-child(3) { --i: 3; }
+.field .field-level-segs > i:nth-child(4) { --i: 4; }
+.field .field-level-segs > i:nth-child(5) { --i: 5; }
+.field .field-level-segs > i:nth-child(6) { --i: 6; }
+.field .field-level-segs > i:nth-child(7) { --i: 7; }
+.field .field-level-segs > i:nth-child(8) { --i: 8; }
+.field .field-level-segs > i:nth-child(9) { --i: 9; }
+.field .field-level-segs > i:nth-child(10) { --i: 10; }
+
+/* The timeline's needle (3 × 24 ink), at the level; a 1px key edge keeps it visible on the ink slot */
+.field .field-level-needle {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--field-vol, 0) * 10%);
+  width: 3px;
+  height: 24px;
+  translate: -50% -50%;
+  background: var(--field-ink);
+  box-shadow: 0 0 0 1px var(--field-key);
+  pointer-events: none;
+  transition: left 120ms var(--field-ease);
+}
+.field .field-level:focus-visible .field-level-slot {
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .45), 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper);
 }
 
 /* ---------- Speed tray (169:149) — grows out of the speed key ---------- */
@@ -981,8 +955,9 @@
   .field .field-key:active,
   .field .field-play:hover { translate: none !important; }
   .field .field-tray { animation-name: field-fade; }
-  .field .field-wheel,
-  .field[data-field-wheel-closing] .field-wheel { animation: none; }
+  .field .field-level,
+  .field[data-field-wheel-closing] .field-level { animation: none; }
+  .field .field-level-needle { transition: none; }
   .field .field-play .field-icon { transition: none !important; scale: 1 !important; }
   .field [data-popup][data-starting-style],
   .field [data-popup][data-ending-style] { scale: 1; }

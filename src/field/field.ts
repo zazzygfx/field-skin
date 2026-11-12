@@ -5,7 +5,7 @@
  *
  * Reshaped from the ejected Video.js 10 default HTML skin (v10.3.0).
  * Registers the Video.js elements FIELD uses, plus the small bits of
- * behaviour CSS can't do: tape counter, play-key meter, chapter chip,
+ * behaviour CSS can't do: tape counter, chapter chip, loading state,
  * controls lock while hovered/focused, key sounds, keyboard hint bar.
  */
 import './field.css';
@@ -48,7 +48,7 @@ import '@videojs/html/ui/captions-radio-group';
 import '@videojs/html/ui/slider-thumbnail';
 import { KeySounds } from './sounds';
 import { formatCounter, renderCounter } from './counter';
-import { mountWheel } from './wheel';
+import { mountVolume } from './volume';
 import { mountSpeed } from './speed';
 import { mountScrub, type Chapter } from './scrub';
 
@@ -67,7 +67,6 @@ export function mountField(root: HTMLElement): void {
   const player = root.closest<PlayerEl>('video-player');
 
   const counter = root.querySelector<HTMLElement>('.field-counter');
-  const meters = root.querySelectorAll<HTMLElement>('.field-meter');
   const length = root.querySelector<HTMLElement>('.field-ready-length');
   const chipBadge = root.querySelector<HTMLElement>('.field-chip-badge');
   const controls = root.querySelector<HTMLElement>('.field-controls-content');
@@ -89,15 +88,17 @@ export function mountField(root: HTMLElement): void {
     shadow.append(style);
   }
 
-  /* ---------- Counter, meter, chip ---------- */
+  /* ---------- Counter + chip ---------- */
   let chapters: Chapter[] = [];
   let scrubTime: number | null = null;
+  let loading = false;
 
   const render = () => {
     const t = media.currentTime;
     const d = media.duration;
     const ready = media.readyState >= 1 && Number.isFinite(d) && d > 0;
-    if (counter) renderCounter(counter, ready ? formatCounter(scrubTime ?? t) : '-- -- --', scrubTime !== null);
+    const text = ready && (!loading || scrubTime !== null) ? formatCounter(scrubTime ?? t) : '-- -- --';
+    if (counter) renderCounter(counter, text, scrubTime !== null);
     if (length && ready) length.textContent = `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
     root.style.setProperty('--field-progress', ready ? `${(t / d) * 100}%` : '0%');
     if (chipBadge) {
@@ -105,23 +106,6 @@ export function mountField(root: HTMLElement): void {
       chipBadge.hidden = i < 0;
       if (i >= 0) chipBadge.textContent = `CH ${i + 1}`;
     }
-  };
-
-  /** Cut the play-key meter into chapter segments with 2px gaps (Figma 174:338). */
-  const segmentMeter = () => {
-    const d = media.duration;
-    if (!chapters.length || !Number.isFinite(d) || d <= 0) {
-      meters.forEach((m) => m.style.removeProperty('mask-image'));
-      return;
-    }
-    const stops = chapters
-      .slice(1)
-      .map((c) => {
-        const p = (c.start / d) * 100;
-        return `#000 calc(${p}% - 1px), transparent calc(${p}% - 1px), transparent calc(${p}% + 1px), #000 calc(${p}% + 1px)`;
-      })
-      .join(', ');
-    meters.forEach((m) => (m.style.maskImage = `linear-gradient(to right, #000 0, ${stops}, #000 100%)`));
   };
 
   const readChapters = () => {
@@ -132,12 +116,29 @@ export function mountField(root: HTMLElement): void {
     if (!cues || !cues.length) return;
     chapters = Array.from(cues).map((c) => ({ start: c.startTime, end: c.endTime, title: (c as VTTCue).text ?? '' }));
     root.toggleAttribute('data-field-chapters', true);
-    segmentMeter();
     render();
   };
 
   for (const ev of ['timeupdate', 'durationchange', 'loadedmetadata', 'seeking', 'emptied']) {
     media.addEventListener(ev, render);
+  }
+
+  /* ---------- Loading / buffering (states 02 + 11): icon dims, counter reads -- -- -- ---------- */
+  let loadingTimer = 0;
+  const syncLoading = () => {
+    const now = !media.paused && (media.readyState < 3 || media.seeking);
+    clearTimeout(loadingTimer);
+    if (now === loading) return;
+    const apply = () => {
+      loading = now;
+      root.toggleAttribute('data-field-loading', now);
+      render();
+    };
+    if (now) loadingTimer = window.setTimeout(apply, 250); // don't flicker on quick seeks
+    else apply();
+  };
+  for (const ev of ['waiting', 'playing', 'canplay', 'canplaythrough', 'seeking', 'seeked', 'play', 'pause', 'loadstart', 'loadeddata', 'stalled', 'emptied']) {
+    media.addEventListener(ev, syncLoading);
   }
   media.addEventListener('loadedmetadata', readChapters);
   media.textTracks?.addEventListener?.('addtrack', () => setTimeout(readChapters));
@@ -238,8 +239,8 @@ export function mountField(root: HTMLElement): void {
     splitAuto();
   });
 
-  /* ---------- Step 3: wheel, speed tray, seek hover / scrub ---------- */
-  mountWheel(root, media, sounds, lock);
+  /* ---------- Step 3: volume meter, speed tray, seek hover / scrub ---------- */
+  mountVolume(root, media, sounds, lock);
   mountSpeed(root, media, sounds, lock);
   mountScrub(
     root,

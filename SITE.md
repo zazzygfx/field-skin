@@ -4,8 +4,6 @@ Designs: `reference/11-site-desktop.png` (1440) and `reference/12-site-mobile.pn
 
 One page, hosted on **Netlify** (suggested name: `field-skin.netlify.app`). The judges score the skin, but this page is how they meet it. It must feel like the player: solid, quiet, made of real parts.
 
-> **Look:** the colours, type and surfaces below are superseded by `STYLE.md` (designer decision, 12 Nov). Sections, content and the native rules still apply.
-
 ## Design plan
 
 **Colour.** Page is a workbench, not paper, so the putty keys lift off it:

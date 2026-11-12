@@ -59,7 +59,6 @@ All are recorded in `SPEC.md`; designer overrides beat Figma.
 ## What's left
 
 **Step 8 — showcase site (done as a draft)**
-- Look follows `STYLE.md` (white gallery, #f5f5f7 bands, 28px cards, system type, #b64400 links, ink pills). Site only; the player is unchanged.
 - `index.html` is now the site (`src/site/`); the player alone with Shift+D lives at `dev.html`.
 - Players are generated from `src/site/player.ts` (made from `dev.html`, ids numbered per player); the state forcing is shared in `src/dev/runner.ts`.
 - Not built from the Figma: the "Made for two thumbs" phone section (upright/sideways renders + QR) and the GitHub link (no repo yet).

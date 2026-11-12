@@ -80,6 +80,7 @@
 .field [data-icon="settings"] { --icon: url('./icons/settings.svg'); }
 .field [data-icon="fullscreen"] { --icon: url('./icons/fullscreen.svg'); }
 .field [data-icon="fullscreen-exit"] { --icon: url('./icons/fullscreen-exit.svg'); }
+.field [data-icon="close"] { --icon: url('./icons/close.svg'); }
 .field [data-icon="pause"] { --icon: url('./icons/pause.svg'); width: 23px; height: 23px; }
 .field [data-icon="play"] { --icon: url('./icons/play.svg'); width: 22px; height: 22px; }
 .field [data-icon="replay"] { --icon: url('./icons/replay.svg'); width: 22px; height: 22px; }
@@ -1547,6 +1548,51 @@
   .field .field-more { padding-top: 24px; }
 }
 @media (prefers-reduced-motion: reduce) { .field .field-more-page { animation: none; } }
+
+/* ---------- Document PiP window (SPEC §11): 400 × 225, FIELD keys, 4px rail ---------- */
+.field[data-field-docpip] media-pip-button {
+  background: var(--field-accent);
+  border-color: var(--field-accent-edge);
+  color: var(--field-on-accent);
+}
+.field.field-pipwin {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border-radius: 0;
+  container-type: normal;
+}
+.field .field-pipwin-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.field .field-pipwin-back,
+.field .field-pipwin-close,
+.field .field-pipwin-row {
+  position: absolute;
+  z-index: 2;
+  transition: opacity var(--field-hide) ease-out;
+}
+.field .field-pipwin-back { top: 12px; left: 12px; }
+.field .field-pipwin-close { top: 12px; right: 12px; }
+.field .field-pipwin-row {
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field .field-pipwin-row .field-play { --field-play-size: 56px; }
+.field.field-pipwin:not([data-awake]) :is(.field-pipwin-back, .field-pipwin-close, .field-pipwin-row) { opacity: 0; }
+.field.field-pipwin[data-awake] :is(.field-pipwin-back, .field-pipwin-close, .field-pipwin-row) { transition-duration: var(--field-show); }
+.field .field-pipwin-rail {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  z-index: 2;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--field-accent) var(--field-progress, 0%), var(--field-rail-track) var(--field-progress, 0%));
+}
 
 /* ---------- Reduced motion: no translate, no scale; fades only ---------- */
 @media (prefers-reduced-motion: reduce) {

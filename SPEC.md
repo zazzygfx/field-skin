@@ -67,7 +67,7 @@ Reference images live in `reference/`. Numbers here are CSS pixels at 1×.
 | **S** | 400–599 | counter (`MM:SS`) · volume | captions · settings · fullscreen | ±10 become double-tap left/right thirds |
 | **XS** | < 400 | volume | captions · more | play key 52px; fullscreen moves into More |
 
-Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-sizes.png`, Figma 180:861 (phone sideways, M) and 180:968 (phone upright, XS).
+Keys never shrink below 48px on desktop. They fold away instead. **Phone (touch, player < 600):** keys draw at a native 40px (play key 48px, icons 18px, pill padding 4 / gap 4, counter 13px) but every key keeps a 44px hit area through invisible padding. See `reference/05-fluid-sizes.png`, Figma 180:861 (phone sideways, M) and 180:968 (phone upright, XS).
 
 - Thumb-wheel width: 300 (XL) · 240 (M ≥ 800, phone sideways) · 220 (M) · 180 (S, XS). At S and XS the right pill steps aside (fades out) while the wheel is open.
 - Strip → key row gap: 13 (XL) · 11 (M) · 10 (S) · 8 (XS). Chip hidden at S and XS.
@@ -90,6 +90,7 @@ Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-si
 ## 5. Play key (icon only — no ring, no meter)
 
 - 58 × 58, radius 15, `--field-key`, 1px edge, hard shadow. Icon only: **44% of the key** (≈26px on 58), truly centred — no nudge. Same rule on the big centred key. Progress is shown by the strip and the idle rail, not the key.
+- The right glyph is always rendered at full opacity (no crossfade through blank); play keys never take the 38% disabled look.
 - States: Pause · Play · Replay (ended) · Loading/Buffering (the icon dims to 40%; the counter reads `-- -- --`) · Focus.
 - **Big centred key:** 96 × 96 with the same icons, centred on the picture whenever the video is paused (not ended). Before the first play (Ready) it also shows the title and length under it, and nothing else is on the picture.
 - **Press (tape-transport):**
@@ -125,7 +126,7 @@ Figma 178:886 (component) and 180:629 (open in place).
 
 ## 8. Menus, shelf and sheets
 
-All grow from the key that opened them: `transform-origin` = that key, `scale(.92) → 1` + fade, 180 ms. Esc closes and returns focus to the key.
+All grow from the key that opened them. Tapping the picture or a sheet's scrim closes an open sheet, tray or menu. `transform-origin` = that key, `scale(.92) → 1` + fade, 180 ms. Esc closes and returns focus to the key.
 
 - **Settings (XL/M):** 340 wide, radius 18, `--field-pill` 97%. Groups: **Quality** (from the stream; hidden on single-rendition files) and **Captions** (from the stream). Rows 44px high, radius 9, selected row `--field-counter` with accent value text.
 - **Pause shelf (XL/M, desktop only):** top-right, 300 wide. **Start over** · then either **Chapters** (titles + times from the chapters track, current one highlighted) **or**, with no chapters, quick jumps −30s −10s +10s +30s. Small `Esc hide` hint below. See `reference/06-pause-settings.png`. Figma 174:809 (chapters) / 174:922 (quick jumps). The title chip reads `Paused at 01:23` while the shelf shows; the 96px centred play key shows too. The shelf only appears after playback has started, never while ended, scrubbing, in error or in PiP. Esc hides it until the next pause.
@@ -150,7 +151,7 @@ All grow from the key that opened them: `transform-origin` = that key, `scale(.9
 | 0–9 | jump to 0–90% |
 | Esc | close menu / sheet / shelf |
 
-- **Focus ring:** 2px `--field-ink` + 3px `--field-paper` halo (inverted on dark materials). Only for `:focus-visible`.
+- **Focus ring:** 2px `--field-ink` + 3px `--field-paper` halo (inverted on dark materials). Only for `:focus-visible` — never for a tap or click (menu rows included).
 - **Hint bar:** after the first keyboard action, a small bar at top centre lists the keys for 4 s. Never shown for mouse/touch users.
 - Tooltips on hover/focus: label + key cap (`Pause  K`), M3 plain tooltip, 24px tall, ink background.
 
@@ -186,7 +187,7 @@ All grow from the key that opened them: `transform-origin` = that key, `scale(.9
 ## 11. Picture-in-picture
 
 - **PiP key** (XL) or More → Picture-in-picture. `P` key.
-- Use **Document Picture-in-Picture** where supported (Chrome/Edge): a 400 × 225 window with FIELD keys — −10, play key, +10, back-to-tab, close — and a 4px progress rail. Elsewhere use the browser's native video PiP.
+- Use **Document Picture-in-Picture** where supported (Chrome/Edge desktop, pointer: fine): a 400 × 225 window with FIELD keys — back-to-tab (top-left), close (top-right), −10 · play key · +10 (centre) — and a 4px progress rail. The window shows a live mirror of the player (`captureStream`), so the real video and Video.js stay in the page and keep the audio; keys fade after 2 s idle; Space/K, J/L, ←/→, Esc work inside it. Back-to-tab closes the window and keeps playing; close also pauses. Elsewhere (Safari, Firefox, phones) the browser's native video PiP is used.
 - Main player shows state 17 while PiP is active.
 - **Optional sticky mini player** (site setting): when the player scrolls out of view while playing, dock a 320 × 180 mini player bottom-right with play key, close and counter. Draggable to any corner. Off by default in the skin, on for the showcase site.
 

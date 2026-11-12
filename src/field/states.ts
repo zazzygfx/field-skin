@@ -194,13 +194,15 @@ export function mountStates(
   const pipKey = $('media-pip-button');
   const pipNote = $('.field-pipnote');
   const syncPip = () => {
-    const on = pipKey?.hasAttribute('data-pip') || forced() === 'pip';
+    const on = pipKey?.hasAttribute('data-pip') || root.hasAttribute('data-field-docpip') || forced() === 'pip';
     root.toggleAttribute('data-field-pip', !!on);
     if (pipNote) pipNote.hidden = !on;
   };
   if (pipKey) new MutationObserver(syncPip).observe(pipKey, { attributes: true, attributeFilter: ['data-pip'] });
+  new MutationObserver(syncPip).observe(root, { attributes: true, attributeFilter: ['data-field-docpip'] });
   $('.field-pip-back')?.addEventListener('click', () => {
-    if (pipKey?.hasAttribute('data-pip')) pipKey.click();
+    if (root.hasAttribute('data-field-docpip')) root.dispatchEvent(new CustomEvent('field-pip-close'));
+    else if (pipKey?.hasAttribute('data-pip')) pipKey.click();
     else if (forced() === 'pip') root.removeAttribute('data-field-pip'), pipNote && (pipNote.hidden = true);
   });
 

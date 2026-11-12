@@ -56,6 +56,7 @@ import { mountVolume } from './volume';
 import { mountSpeed } from './speed';
 import { mountScrub, type Chapter } from './scrub';
 import { mountStates, type StatesApi } from './states';
+import { mountDocPip } from './pip';
 
 export { formatCounter };
 
@@ -325,6 +326,7 @@ export function mountField(root: HTMLElement): void {
   /* ---------- Step 3: volume meter, speed tray, seek hover / scrub ---------- */
   const volume = mountVolume(root, media, sounds, lock);
   const speed = mountSpeed(root, media, sounds, lock);
+  mountDocPip(root, media, sounds);
   states = mountStates(root, media, sounds, () => (root.hasAttribute('data-field-no-chapters') ? [] : chapters), lock, forced);
   const scrub = mountScrub(
     root,

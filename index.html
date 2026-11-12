@@ -1,0 +1,143 @@
+<!doctype html>
+<!--
+  FIELD — a Video.js 10 skin
+  Copyright 2026 Zazzy (@zazzygfx) · Licensed under the Apache License, Version 2.0
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#DEDBD2">
+  <title>FIELD — step 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      background: #F4F2EC;
+      color: #17160F;
+      font-family: "DM Sans", system-ui, sans-serif;
+    }
+    main { width: min(1180px, 100% - 32px); margin: 48px auto; }
+    .stage video-player { display: block; }
+    .stage .field { border-radius: 16px; }
+    .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
+  </style>
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <main>
+    <div class="stage">
+      <video-player>
+        <media-container class="field" data-field-theme="putty">
+          <mux-video
+            data-field-media
+            src="https://stream.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU.m3u8"
+            playsinline
+            crossorigin="anonymous"
+            preload="metadata">
+            <track kind="chapters" src="/chapters.vtt" srclang="en" label="Chapters" default>
+            <track kind="captions" src="/captions-en.vtt" srclang="en" label="English">
+          </mux-video>
+
+          <media-poster class="field-poster">
+            <img alt="" decoding="async" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21">
+          </media-poster>
+
+          <div class="field-chip">
+            <span class="field-chip-badge" hidden></span>
+            <span class="field-chip-title">Caminandes 3: Llamigos</span>
+          </div>
+
+          <div class="field-rail" aria-hidden="true"></div>
+
+          <media-controls class="field-controls">
+            <media-controls-backdrop class="field-scrim"></media-controls-backdrop>
+            <media-controls-content class="field-controls-content">
+
+              <div class="field-strip">
+                <media-time-slider class="field-strip-slider" label="Seek">
+                  <media-time-slider-chapters class="field-strip-chapters">
+                    <template>
+                      <div class="field-strip-chapter">
+                        <media-slider-track class="field-strip-track">
+                          <media-slider-buffer class="field-strip-buffer"></media-slider-buffer>
+                          <media-slider-fill class="field-strip-fill"></media-slider-fill>
+                        </media-slider-track>
+                      </div>
+                    </template>
+                  </media-time-slider-chapters>
+                  <media-slider-thumb class="field-needle"></media-slider-thumb>
+                </media-time-slider>
+              </div>
+
+              <div class="field-row">
+                <media-controls-group class="field-pill field-pill-left" aria-label="Position and volume">
+                  <span class="field-counter" aria-hidden="true">-- -- --</span>
+                  <media-seek-button class="field-key" seconds="-10" label="Back 10 seconds">−10</media-seek-button>
+                  <media-mute-button class="field-key field-key-icon">
+                    <media-icon name="volume-high" class="field-i-high"></media-icon>
+                    <media-icon name="volume-low" class="field-i-low"></media-icon>
+                    <media-icon name="volume-off" class="field-i-off"></media-icon>
+                  </media-mute-button>
+                  <media-seek-button class="field-key" seconds="10" label="Forward 10 seconds">+10</media-seek-button>
+                </media-controls-group>
+
+                <div class="field-row-gap"></div>
+
+                <media-controls-group class="field-pill field-pill-right" aria-label="Playback options">
+                  <media-captions-button class="field-key field-key-icon">
+                    <media-icon name="captions-off" class="field-i-off"></media-icon>
+                    <media-icon name="captions-on" class="field-i-on"></media-icon>
+                  </media-captions-button>
+                  <media-playback-rate-button class="field-key field-speed" rates="1 1.25 1.5 2 0.5"></media-playback-rate-button>
+                  <media-pip-button class="field-key field-key-icon">
+                    <media-icon name="pip-enter" class="field-i-enter"></media-icon>
+                    <media-icon name="pip-exit" class="field-i-exit"></media-icon>
+                  </media-pip-button>
+                  <button type="button" class="field-key field-key-icon field-settings" aria-label="Settings">
+                    <media-icon name="settings"></media-icon>
+                  </button>
+                  <media-fullscreen-button class="field-key field-key-icon">
+                    <media-icon name="fullscreen-enter" class="field-i-enter"></media-icon>
+                    <media-icon name="fullscreen-exit" class="field-i-exit"></media-icon>
+                  </media-fullscreen-button>
+                </media-controls-group>
+
+                <media-play-button class="field-key field-play">
+                  <media-icon name="pause" class="field-i-pause"></media-icon>
+                  <media-icon name="play" class="field-i-play"></media-icon>
+                  <media-icon name="restart" class="field-i-restart"></media-icon>
+                  <span class="field-meter" aria-hidden="true"></span>
+                </media-play-button>
+              </div>
+
+            </media-controls-content>
+          </media-controls>
+
+          <media-hotkey keys="Space" action="togglePaused"></media-hotkey>
+          <media-hotkey keys="k" action="togglePaused"></media-hotkey>
+          <media-hotkey keys="m" action="toggleMuted"></media-hotkey>
+          <media-hotkey keys="ArrowRight" action="seekStep" value="10"></media-hotkey>
+          <media-hotkey keys="ArrowLeft" action="seekStep" value="-10"></media-hotkey>
+          <media-hotkey keys="l" action="seekStep" value="10"></media-hotkey>
+          <media-hotkey keys="j" action="seekStep" value="-10"></media-hotkey>
+          <media-hotkey keys="0-9" action="seekToPercent"></media-hotkey>
+          <media-hotkey keys=">" action="speedUp"></media-hotkey>
+          <media-hotkey keys="<" action="speedDown"></media-hotkey>
+          <media-hotkey keys="f" action="toggleFullscreen"></media-hotkey>
+          <media-hotkey keys="c" action="toggleSubtitles"></media-hotkey>
+          <media-hotkey keys="p" action="togglePictureInPicture"></media-hotkey>
+          <media-gesture type="tap" action="togglePaused" pointer="mouse" region="center"></media-gesture>
+          <media-gesture type="tap" action="toggleControls" pointer="touch"></media-gesture>
+          <media-status-announcer class="field-sr"></media-status-announcer>
+        </media-container>
+      </video-player>
+    </div>
+    <p class="note">Step 1 · skeleton · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+  </main>
+</body>
+</html>

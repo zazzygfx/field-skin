@@ -1,0 +1,479 @@
+/*
+ * FIELD — a Video.js 10 skin
+ * Copyright 2026 Zazzy (@zazzygfx)
+ * Licensed under the Apache License, Version 2.0
+ *
+ * One stylesheet, themed entirely by tokens.css. Reshaped from the ejected
+ * Video.js 10 default HTML skin. Visual state comes from the data-* attributes
+ * Video.js sets (data-paused, data-muted, data-visible, …).
+ *
+ * Step 1 (skeleton): XL layout, tape strip, pills, play key, idle rail.
+ */
+@import '../../tokens.css';
+
+/* ---------- Derived (all from tokens) ---------- */
+.field {
+  --field-ink-18: color-mix(in srgb, var(--field-ink) 18%, transparent);
+  --field-ink-30: color-mix(in srgb, var(--field-ink) 30%, transparent);
+  --field-ink-35: color-mix(in srgb, var(--field-ink) 35%, transparent);
+  --field-layer-hover: color-mix(in srgb, var(--field-ink) 8%, transparent);
+  --field-layer-press: color-mix(in srgb, var(--field-ink) 12%, transparent);
+  --field-scrim: rgb(18 18 15 / .62);
+  --field-progress: 0%;
+}
+
+/* ---------- Player box ---------- */
+.field {
+  container: field / inline-size;
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  isolation: isolate;
+  background: #000;
+  color: var(--field-ink);
+  font-family: var(--field-font);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.field [data-field-media] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  --media-object-fit: contain;
+}
+
+/* ---------- Poster ---------- */
+.field .field-poster {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity var(--field-hide) ease-out;
+}
+.field .field-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.field .field-poster:not([data-visible]) { opacity: 0; }
+
+/* ---------- Scrim (bottom 170px, only while controls show) ---------- */
+.field .field-scrim {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 170px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--field-scrim));
+}
+
+/* ---------- Title chip ---------- */
+.field .field-chip {
+  position: absolute;
+  top: var(--field-inset);
+  left: var(--field-inset);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 2 * var(--field-inset));
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--field-edge);
+  border-radius: 9px;
+  background: var(--field-key);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.field .field-chip-title { overflow: hidden; text-overflow: ellipsis; }
+.field .field-chip-badge {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--field-accent);
+  color: var(--field-on-accent);
+  font-family: var(--field-mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 12px;
+  letter-spacing: .06em;
+}
+.field .field-chip-badge[hidden] { display: none; }
+
+/* ---------- Controls layer ---------- */
+.field .field-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.field .field-controls-content {
+  position: absolute;
+  left: var(--field-inset);
+  right: var(--field-inset);
+  bottom: var(--field-inset);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.field .field-controls-content > * { pointer-events: auto; }
+
+.field .field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field .field-row-gap { flex: 1; min-width: 0; }
+
+/* ---------- Pills ---------- */
+.field .field-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid var(--field-edge);
+  border-radius: var(--field-pill-radius);
+  background: var(--field-pill);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+}
+
+/* ---------- Keys ---------- */
+.field .field-key {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: var(--field-key-size);
+  height: var(--field-key-size);
+  padding: 0 10px;
+  margin: 0;
+  border: 1px solid var(--field-edge);
+  border-radius: var(--field-radius);
+  background: var(--field-key);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+  color: var(--field-ink);
+  font: 600 14px/1 var(--field-font);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  outline: none;
+  transition:
+    transform var(--field-press-up) var(--field-ease),
+    box-shadow var(--field-press-up) var(--field-ease),
+    background-image var(--field-press-up) var(--field-ease);
+}
+.field .field-key-icon { padding: 0; width: var(--field-key-size); }
+
+.field .field-key media-icon,
+.field .field-key svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .field .field-key:not([aria-disabled="true"]):hover {
+    background-image: linear-gradient(var(--field-layer-hover), var(--field-layer-hover));
+  }
+  .field .field-play:not([aria-disabled="true"]):hover { transform: translateY(-1px); }
+}
+
+.field .field-key:not([aria-disabled="true"]):active {
+  transform: translateY(2px);
+  box-shadow: none;
+  background-image: linear-gradient(var(--field-layer-press), var(--field-layer-press));
+  transition-duration: var(--field-press-down);
+}
+
+.field .field-key:focus-visible {
+  outline: 2px solid var(--field-ink);
+  outline-offset: 0;
+  box-shadow: 0 0 0 5px var(--field-paper);
+  z-index: 1;
+}
+
+.field .field-key[aria-disabled="true"] { opacity: .38; cursor: default; }
+.field .field-key[data-hidden] { display: none; }
+
+/* Active choice = accent (the one accent rule) */
+.field .field-key[data-active],
+.field .field-key[data-pip] {
+  background: var(--field-accent);
+  border-color: var(--field-accent-edge);
+  color: var(--field-on-accent);
+}
+
+/* Icon swaps driven by Video.js data attributes */
+.field media-mute-button .field-i-off,
+.field media-mute-button .field-i-low,
+.field media-mute-button[data-volume-level="off"] .field-i-high,
+.field media-mute-button[data-volume-level="low"] .field-i-high { display: none; }
+.field media-mute-button[data-volume-level="off"] .field-i-off,
+.field media-mute-button[data-volume-level="low"] .field-i-low { display: block; }
+
+.field media-mute-button[data-muted] {
+  background: var(--field-counter);
+  border-color: var(--field-counter);
+  color: var(--field-counter-text);
+}
+
+.field media-captions-button .field-i-on,
+.field media-captions-button[data-active] .field-i-off { display: none; }
+.field media-captions-button[data-active] .field-i-on { display: block; }
+
+.field media-pip-button .field-i-exit,
+.field media-pip-button[data-pip] .field-i-enter { display: none; }
+.field media-pip-button[data-pip] .field-i-exit { display: block; }
+
+.field media-fullscreen-button .field-i-exit,
+.field media-fullscreen-button[data-fullscreen] .field-i-enter { display: none; }
+.field media-fullscreen-button[data-fullscreen] .field-i-exit { display: block; }
+
+/* Speed key: label comes straight from data-rate */
+.field .field-speed::before {
+  content: attr(data-rate) "×";
+}
+.field .field-speed:not([data-rate])::before { content: "1×"; }
+
+/* ---------- Counter ---------- */
+.field .field-counter {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  height: var(--field-key-size);
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--field-counter);
+  color: var(--field-counter-text);
+  font: 700 15px/1 var(--field-mono);
+  letter-spacing: .04em;
+  white-space: pre;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+/* ---------- Play key (progress meter inside, SPEC §5) ---------- */
+.field .field-play {
+  width: var(--field-play-size);
+  min-width: var(--field-play-size);
+  height: var(--field-play-size);
+  padding: 0;
+  border-radius: 25%;
+}
+.field .field-play media-icon {
+  width: 40%;
+  height: 40%;
+  translate: 0 -6%;
+}
+.field .field-play .field-i-play,
+.field .field-play .field-i-restart,
+.field .field-play[data-paused] .field-i-pause,
+.field .field-play[data-ended] .field-i-pause,
+.field .field-play[data-ended] .field-i-play { display: none; }
+.field .field-play[data-paused]:not([data-ended]) .field-i-play,
+.field .field-play[data-ended] .field-i-restart { display: block; }
+.field .field-play > media-icon { grid-area: 1 / 1; }
+
+.field .field-meter {
+  position: absolute;
+  left: 22%;
+  width: 56%;
+  bottom: 20%;
+  height: 3px;
+  border-radius: 1.5px;
+  background: linear-gradient(
+    to right,
+    var(--field-accent) var(--field-progress),
+    var(--field-ink-18) var(--field-progress)
+  );
+  pointer-events: none;
+}
+.field .field-play[data-ended] .field-meter { --field-progress: 100%; }
+
+/* ---------- Tape strip (timeline, SPEC §2) ---------- */
+.field .field-strip {
+  position: relative;
+  box-sizing: border-box;
+  height: var(--field-strip-h);
+  border: 1px solid var(--field-edge);
+  border-radius: calc(var(--field-strip-h) / 2);
+  background: var(--field-key);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+}
+
+/* The real slider: inner width (14px padding), 44px hit band */
+.field .field-strip-slider {
+  --strip-track-y: 14px;           /* track centre inside the 26px strip (minus 1px border) */
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  top: 50%;
+  height: var(--field-strip-hit);
+  translate: 0 -50%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+  --hit-offset: calc((var(--field-strip-hit) - var(--field-strip-h)) / 2 + 1px);
+}
+
+/* Ticks every 5% of the inner width; every 5th one taller */
+.field .field-strip-slider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--hit-offset) + 4px);
+  height: 6px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--field-ink-35) 1px, transparent 1px),
+    linear-gradient(to right, var(--field-ink-35) 1px, transparent 1px);
+  background-size:
+    calc((100% - 1px) / 4) 6px,
+    calc((100% - 1px) / 20) 3px;
+  background-repeat: repeat-x;
+  background-position: 0 0, 0 0;
+}
+
+.field .field-strip-chapters {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.field .field-strip-chapter {
+  position: absolute;
+  inset: 0;
+  /* 2px gap between chapters */
+  clip-path: inset(
+    0
+    calc(100% - var(--media-slider-chapter-end, 100%) + 1px)
+    0
+    calc(var(--media-slider-chapter-start, 0%) + 1px)
+  );
+}
+.field .field-strip-chapter:first-child {
+  clip-path: inset(0 calc(100% - var(--media-slider-chapter-end, 100%) + 1px) 0 0);
+}
+.field .field-strip-chapter:last-child {
+  clip-path: inset(0 0 0 calc(var(--media-slider-chapter-start, 0%) + 1px));
+}
+.field .field-strip-chapter:only-child { clip-path: none; }
+
+.field .field-strip-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--hit-offset) + var(--strip-track-y) - 2px);
+  height: 4px;
+  display: block;
+  background: var(--field-ink-18);
+}
+.field .field-strip-buffer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--media-slider-buffer, 0%);
+  display: block;
+  background: var(--field-ink-30);
+}
+.field .field-strip-fill {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 6px;
+  width: var(--media-slider-fill, 0%);
+  display: block;
+  border-radius: 3px;
+  background: var(--field-accent);
+}
+.field .field-strip-slider[data-dragging] .field-strip-fill { width: var(--media-slider-pointer, 0%); }
+
+/* Needle = the handle */
+.field .field-needle {
+  position: absolute;
+  left: var(--media-slider-fill, 0%);
+  top: calc(var(--hit-offset) + var(--strip-track-y));
+  width: 3px;
+  height: 20px;
+  translate: -50% -50%;
+  display: block;
+  border-radius: 1px;
+  background: var(--field-ink);
+  outline: none;
+  z-index: 1;
+}
+.field .field-strip-slider[data-dragging] .field-needle { left: var(--media-slider-pointer, 0%); }
+
+/* Focus ring goes on the whole strip */
+.field .field-strip:has(:focus-visible) {
+  outline: 2px solid var(--field-ink);
+  box-shadow: 0 0 0 5px var(--field-paper);
+}
+
+/* ---------- Watching (idle): only the 4px rail stays (SPEC §4) ---------- */
+.field .field-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 4px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--field-accent) var(--field-progress),
+    color-mix(in srgb, var(--field-key) 40%, transparent) var(--field-progress)
+  );
+  opacity: 0;
+  transition: opacity var(--field-show) ease-out;
+}
+
+.field .field-chip,
+.field .field-scrim,
+.field .field-controls-content {
+  transition: opacity var(--field-show) ease-out;
+}
+
+.field:not([data-controls-visible]) .field-chip,
+.field:not([data-controls-visible]) .field-scrim,
+.field:not([data-controls-visible]) .field-controls-content {
+  opacity: 0;
+  transition-duration: var(--field-hide);
+}
+.field:not([data-controls-visible]) .field-controls-content > * { pointer-events: none; }
+.field:not([data-controls-visible]) .field-rail {
+  opacity: 1;
+  transition-duration: var(--field-hide);
+}
+.field:fullscreen:not([data-controls-visible]) { cursor: none; }
+
+/* ---------- Screen-reader only ---------- */
+.field .field-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

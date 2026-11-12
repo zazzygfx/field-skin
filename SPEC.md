@@ -10,7 +10,7 @@ Reference images live in `reference/`. Numbers here are CSS pixels at 1×.
 
 1. **Hardware, not glass.** Solid keys, 1px edge, a 2px hard shadow (`0 2px 0`). No blur in the default material.
 
-> **Overrides (designer, 12 Nov 2026):** these supersede Figma where they differ — the play keys are icon-only (no progress meter); the speed key always shows its label with 7 ticks under it; volume opens as a 10-segment level meter (not a ribbed thumb-wheel).
+> **Overrides (designer, 12 Nov 2026):** these supersede Figma where they differ — the play keys are icon-only (no progress meter); the speed key always shows its label with 7 ticks under it.
 2. **One accent.** It marks played time and the active choice. Nothing else is accent-coloured.
 3. **Left = where, right = what.** Left pill: counter, −10, volume, +10. Right pill: captions, speed, PiP, settings, fullscreen. Play key far right, under the right thumb.
 4. **Feedback at the source.** Bubbles, the wheel, the tray and menus grow out of the key that was pressed.
@@ -93,16 +93,18 @@ Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-si
 
 ---
 
-## 6. Volume level meter (signature)
+## 6. Volume thumb-wheel (signature)
+
+Figma 178:886 (component) and 180:629 (open in place).
 
 - **Where:** it opens **inside the left pill, at the volume key**. While open, −10 and +10 fold away; the counter stays; the pill widens to the right into the empty middle. Right pill and play key never move.
 - **Open:** click/tap the volume key and hold ≥ 250 ms, **or** press ↑/↓, **or** hover 400 ms (pointer). Plain tap = **mute / unmute**.
-- **Meter:** 300 wide at XL (220 at M, 180 at XS). An ink slot (`--field-counter`, radius 9, 36 tall) holding **10 segments** — rounded bars with 4px gaps — lit `--field-accent` up to the level; empty segments are `--field-counter-text` at 18% (ink at 18% would vanish on the ink slot). On top, **the timeline's needle** (3 × 24, `--field-ink`, with a 1px `--field-key` edge so it reads on the slot) sits at the level. No arrows, no drum.
-- **Input:** click anywhere on the slot to jump to that step; drag the needle; mouse wheel / trackpad; ↑/↓ (±1); on the focused meter also ←/→ (±1), PageUp/PageDown (±3), Home/End. Each step: a tiny tick (if Key sounds are on), the key number updates, optional 8 ms vibration on Android.
+- **Wheel:** 300 × 48 at XL (220 at M, 180 at XS). Ink slot (radius 9, inner shadow) holding a **drum**: horizontal gradient `--field-drum-lo → --field-drum-hi → --field-drum-lo`, with 26 ribs whose spacing follows a cylinder (dense at the edges, fading out). Accent **index line** in the centre. **10 detent bars** under the slot, filled with accent up to the level. Normal pointer cursor (no resize arrows).
+- **Input:** click anywhere on the wheel to jump to that level; drag sideways to roll it (1 detent per 24px); mouse wheel / trackpad and ↑/↓ step by 1; on the focused wheel also ←/→ (±1), PageUp/PageDown (±3), Home/End. Each detent: the ribs roll by one rib (120 ms), the key does a 1-frame sink and shows the new number, a tiny tick plays (if Key sounds are on), optional 8 ms vibration on Android.
 - **Key shows the level:** while open, the volume key turns accent and shows the number `0–10` in mono 18px. At 0 the key turns `--field-counter` (muted).
-- **Close:** 1.5 s after the last input, 600 ms after the pointer leaves the pill, on Esc, or on a click outside. The meter slides back into the key (220 ms) and −10/+10 return; the number stays 600 ms, then the speaker icon returns.
+- **Close:** 1.5 s after the last input, 600 ms after the pointer leaves the pill, on Esc, or on a click outside. The wheel rolls back into the key (220 ms) and −10/+10 return; the number stays 600 ms, then the speaker icon returns.
 - `role="slider"`, `aria-valuemin=0`, `aria-valuemax=10`, `aria-valuetext="Volume 7 of 10"`.
-- **iPhone:** browsers can't set volume. No meter; the key only mutes. Desktop + Android get the meter.
+- **iPhone:** browsers can't set volume. No wheel; the key only mutes. Desktop + Android get the wheel.
 
 ---
 
@@ -154,7 +156,7 @@ All grow from the key that opened them: `transform-origin` = that key, `scale(.9
 | 02 | Loading | Play-key icon dims to 40%; counter reads `-- -- --`. |
 | 03 | Scrubbing | Frame preview + time + chapter; counter rolls. |
 | 04 | Seek ±10 | Accent bubble grows from the pressed key: `+10s → 01:33`. Double-tap sides on touch. |
-| 05 | Volume | Level meter open in place (§6). |
+| 05 | Volume | Wheel open in place (§6). |
 | 06 | Muted | Volume key turns `--field-counter`; bubble `Muted · tap to unmute`. |
 | 07 | Speed | Tray open from the speed key. |
 | 08 | Captions on | Captions key accent. Cue box: ink 86%, cream text, sits **above the strip** and rises when controls show. |
@@ -209,7 +211,7 @@ Tokens in `tokens.css`. Set on the player: `data-field-theme="putty|ink|liquid|h
 | Controls show/hide | pointer, tap, key · 2 s idle | opacity | 180 in · 300 out · ease-out | same |
 | Key press | pointer / touch / Space | translateY 2px, shadow 0, 12% layer | 90 down · 140 up | layer only |
 | Play ↔ pause | click, K, Space | bars → triangle | 180 · `cubic-bezier(.2,0,0,1)` | instant swap |
-| Volume meter | hold volume, ↑↓, scroll | pill width + meter clip; segments light, needle moves | 220 open/close · 1.5 s idle · 600 ms after leave | opens in place |
+| Volume wheel | hold volume, ↑↓, scroll, click | pill width + wheel clip; ribs roll one rib per detent | 220 open/close · 120 per detent · 1.5 s idle · 600 ms after leave | opens in place, no roll |
 | Speed | click / hold | label crossfade (on change only), ticks; tray grows | 140 · tray 200 | instant |
 | Menus & sheets | settings, more, pause | scale .92→1 from key + fade; sheets slide 24px | 180 · 220 | fade only |
 | Seek hover / scrub | pointer, drag, J/L | ghost needle + tag; counter digits roll | 1:1 with pointer | digits change |

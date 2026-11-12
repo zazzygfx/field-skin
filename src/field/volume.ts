@@ -1,11 +1,12 @@
 /*
- * FIELD — volume level meter (SPEC §6)
+ * FIELD — volume thumb-wheel (SPEC §6, Figma 178:886 / 180:629)
  * Copyright 2026 Zazzy (@zazzygfx)
  * Licensed under the Apache License, Version 2.0
  *
  * Opens in place inside the left pill, at the volume key. Tap the key = mute.
- * Hold ≥250 ms, hover 400 ms or ↑/↓ = open. Click a segment to jump to it,
- * drag the needle, scroll, ↑/↓ (±1), PageUp/PageDown (±3), Home/End.
+ * Hold ≥250 ms, hover 400 ms or ↑/↓ = open. Click anywhere on the wheel to
+ * jump to that level, drag sideways to roll it (24 px per detent), scroll,
+ * ↑/↓ (±1), PageUp/PageDown (±3), Home/End. The ribs roll one rib per detent.
  * Closes 1.5 s after the last input, 600 ms after the pointer leaves the pill,
  * on Esc, or on a click outside.
  */
@@ -18,6 +19,10 @@ const IDLE_CLOSE_MS = 1500;
 const LEAVE_CLOSE_MS = 600;
 const NUMBER_LINGER_MS = 600;
 const SLIDE_MS = 220;
+const DETENT_PX = 24;
+const RIBS = 26;
+const RIB_STEP = (83 / 12) * (Math.PI / 180); // Figma: 12 ribs from the centre reach ~83°
+const ROLL_MS = 120;
 
 /** iPhone/iPad can't set media volume from script: the key only mutes there. */
 export function canSetVolume(): boolean {
@@ -39,11 +44,12 @@ export function mountVolume(
   lock: (why: string, on: boolean) => void,
 ): void {
   const key = root.querySelector<HTMLElement>('.field-vol');
-  const meter = root.querySelector<HTMLElement>('.field-level');
-  const slot = meter?.querySelector<HTMLElement>('.field-level-track');
+  const meter = root.querySelector<HTMLElement>('.field-wheel');
+  const slot = meter?.querySelector<HTMLElement>('.field-wheel-slot');
+  const ribsEl = meter?.querySelector<HTMLElement>('.field-wheel-ribs');
   const num = key?.querySelector<HTMLElement>('.field-vol-num');
   const pill = key?.closest<HTMLElement>('.field-pill');
-  if (!key || !meter || !slot || !num || !pill) return;
+  if (!key || !meter || !slot || !ribsEl || !num || !pill) return;
 
   if (!canSetVolume()) {
     root.setAttribute('data-field-no-volume', '');
@@ -52,11 +58,48 @@ export function mountVolume(
 
   const level = () => (media.muted ? 0 : Math.round(media.volume * STEPS));
 
+  /* ---------- Ribs: spaced like a cylinder; `phase` is the drum rotation in detents ---------- */
+  const ribs = Array.from({ length: RIBS }, () => {
+    const r = document.createElement('i');
+    ribsEl.append(r);
+    return r;
+  });
+  let phase = level();
+  const drawRibs = () => {
+    const frac = phase - Math.floor(phase);
+    ribs.forEach((r, i) => {
+      const a = (i - 13 + frac) * RIB_STEP;
+      const visible = Math.abs(a) < Math.PI / 2;
+      r.style.opacity = visible ? String(0.3 + 0.4 * Math.cos(a)) : '0';
+      r.style.left = `calc(50% + ${Math.sin(a).toFixed(4)} * (50% - 5px) - 0.75px)`;
+    });
+  };
+  /** Roll the drum to `target` so every detent visibly moves the ribs by one. */
+  let rollFrame = 0;
+  const rollTo = (target: number) => {
+    cancelAnimationFrame(rollFrame);
+    if (reducedMotion()) {
+      phase = target;
+      return drawRibs();
+    }
+    const from = phase;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - t0) / ROLL_MS);
+      phase = from + (target - from) * (1 - (1 - k) ** 3);
+      drawRibs();
+      rollFrame = k < 1 ? requestAnimationFrame(tick) : 0;
+    };
+    rollFrame = requestAnimationFrame(tick);
+  };
+  drawRibs();
+
   const sync = () => {
     const l = level();
     meter.setAttribute('aria-valuenow', String(l));
     meter.setAttribute('aria-valuetext', `Volume ${l} of ${STEPS}`);
     meter.style.setProperty('--field-vol', String(l));
+    if (!dragging && !rollFrame) phase = l;
     num.textContent = String(l);
     root.toggleAttribute('data-field-vol-zero', l === 0);
   };
@@ -120,30 +163,37 @@ export function mountVolume(
     media.volume = l / STEPS;
     media.muted = l === 0;
     sync();
+    rollTo(l);
     sounds.play('detent');
+    key.setAttribute('data-field-sink', ''); // 1-frame key sink per detent
+    requestAnimationFrame(() => requestAnimationFrame(() => key.removeAttribute('data-field-sink')));
     if ('vibrate' in navigator && /Android/i.test(navigator.userAgent)) navigator.vibrate?.(8);
   };
   const step = (delta: number) => {
     open();
     setLevel(level() + delta);
   };
-  /** Pointer x → step: clicking a segment selects it; the far-left edge is 0. */
+  /** Pointer x → level: click anywhere on the wheel to jump there; the far-left edge is 0. */
   const levelAt = (clientX: number) => {
     const r = slot.getBoundingClientRect();
     const pct = (clientX - r.left) / r.width;
     return pct < 0.03 ? 0 : Math.ceil(Math.min(1, pct) * STEPS);
   };
 
-  /* ---------- Meter: click to jump, drag the needle ---------- */
+  /* ---------- Wheel: click jumps to that level, then drag sideways rolls it ---------- */
+  let dragX = 0;
+  let dragLevel = 0;
   meter.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     e.preventDefault();
     meter.setPointerCapture(e.pointerId);
     dragging = true;
     setLevel(levelAt(e.clientX));
+    dragX = e.clientX;
+    dragLevel = level();
   });
   meter.addEventListener('pointermove', (e) => {
-    if (dragging) setLevel(levelAt(e.clientX));
+    if (dragging) setLevel(dragLevel + (e.clientX - dragX) / DETENT_PX);
   });
   const endDrag = () => {
     if (!dragging) return;
@@ -167,10 +217,15 @@ export function mountVolume(
       key.setPointerCapture?.(e.pointerId);
     }, HOLD_MS);
   });
+  let holdX = 0;
+  let holdLevel = 0;
+  key.addEventListener('pointerdown', (e) => {
+    holdX = e.clientX;
+    holdLevel = level();
+  });
+  // after a hold, keep the finger down and slide sideways to roll
   key.addEventListener('pointermove', (e) => {
-    if (!held) return;
-    const r = slot.getBoundingClientRect();
-    if (e.clientX >= r.left) setLevel(levelAt(e.clientX));
+    if (held) setLevel(holdLevel + (e.clientX - holdX) / DETENT_PX);
   });
   const release = () => {
     clearTimeout(holdTimer);

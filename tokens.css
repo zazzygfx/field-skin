@@ -123,6 +123,9 @@
     --field-key: #EDEBE2; --field-ink: #17160F; --field-edge: #CBC7B8;
     --field-pill: #F4F2EC; --field-counter: #17160F; --field-blur: none;
     --field-shadow: 0 2px 0 rgb(23 22 15 / .35);
+    /* the rest of Putty, so panels, counter and drum are solid too */
+    --field-paper: #F4F2EC; --field-counter-text: #F2EFE5; --field-on-accent: #FFF6EF;
+    --field-drum-lo: #59574D; --field-drum-hi: #EDEBE2;
   }
 }
 @media (prefers-contrast: more) {

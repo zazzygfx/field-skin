@@ -21,7 +21,8 @@
   --field-layer-press: color-mix(in srgb, var(--field-ink) 12%, transparent);
   --field-rail-track: color-mix(in srgb, var(--field-key) 40%, transparent);
   --field-panel: color-mix(in srgb, var(--field-paper) 97%, transparent);
-  --field-scrim: rgb(18 18 15 / .62);
+  --field-scrim: rgb(18 18 15 / .62);         /* over the picture, same in every theme */
+  --field-sheet-scrim: rgb(18 18 15 / .4);
   --field-player-radius: 20px;
   --field-progress: 0%;
 }
@@ -1077,7 +1078,7 @@
 
 /* ---------- Phone sheets (SPEC §8): Settings/More becomes an M3 sheet ---------- */
 @media (pointer: coarse) {
-  .field .field-menu::backdrop { background: rgb(18 18 15 / .4); }
+  .field .field-menu::backdrop { background: var(--field-sheet-scrim, rgb(18 18 15 / .4)); }
   .field .field-menu .field-option,
   .field .field-menu .field-row-item { height: 48px; }
 }
@@ -1343,7 +1344,7 @@
     border-radius: 2px;
     background: var(--field-ink-30);
   }
-  .field .field-shelf::backdrop { background: rgb(18 18 15 / .4); }
+  .field .field-shelf::backdrop { background: var(--field-sheet-scrim, rgb(18 18 15 / .4)); }
   .field .field-shelf-esc { display: none; }
   .field .field-shelf-chapter,
   .field .field-shelf-row { min-height: 48px; }

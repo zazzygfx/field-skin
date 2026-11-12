@@ -205,9 +205,10 @@ All grow from the key that opened them. Tapping the picture or a sheet's scrim c
 
 Tokens in `tokens.css`. Set on the player: `data-field-theme="putty|ink|liquid|holiday-snow|holiday-pine"`, accent via `--field-accent`.
 
-- **Accent guard:** at runtime, if `--field-accent` has < 3:1 contrast against `--field-key`, darken it in 4% steps until it passes. Text on accent uses `--field-on-accent`.
+- **Accent guard:** at runtime, if `--field-accent` has < 3:1 contrast against `--field-key`, darken it in 4% steps until it passes (on dark keys — Ink, Pine — where darkening can't help, lighten in 4% steps instead). Translucent keys (Liquid) are judged over a dark frame. The requested accent is remembered, so switching theme re-checks it from the original. Note: the default orange `#FF4D00` is 2.75:1 on Putty keys, so the guard renders it as `#F54A00` (3.0:1). Text on accent uses `--field-on-accent`.
+- **Switching:** set `data-field-theme` on the player at any time; the guard re-runs. The dev page also takes `?theme=ink|liquid|holiday-snow|holiday-pine` and `?accent=%23FFE14D`, and the Shift+D panel has theme buttons.
 - `prefers-reduced-motion`: no translate, no roll, no scale; fades only; loading sweep → `LOADING` in the counter.
-- `prefers-reduced-transparency`: Liquid → Putty; pill alpha → 1.
+- `prefers-reduced-transparency`: Liquid → Putty (every surface solid: keys, pills, panels, counter, drum); pill alpha → 1.
 - `prefers-contrast: more`: state 18.
 - `forced-colors: active`: keys `ButtonFace`/`ButtonText`, needle and focus `Highlight`.
 

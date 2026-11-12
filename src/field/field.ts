@@ -57,6 +57,8 @@ import { mountSpeed } from './speed';
 import { mountScrub, type Chapter } from './scrub';
 import { mountStates, type StatesApi } from './states';
 import { mountDocPip } from './pip';
+import { mountTheme } from './theme';
+export { THEMES, guardAccent } from './theme';
 
 export { formatCounter };
 
@@ -327,6 +329,7 @@ export function mountField(root: HTMLElement): void {
   const volume = mountVolume(root, media, sounds, lock);
   const speed = mountSpeed(root, media, sounds, lock);
   mountDocPip(root, media, sounds);
+  mountTheme(root);
   states = mountStates(root, media, sounds, () => (root.hasAttribute('data-field-no-chapters') ? [] : chapters), lock, forced);
   const scrub = mountScrub(
     root,

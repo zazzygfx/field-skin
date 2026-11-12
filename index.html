@@ -7,7 +7,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#DEDBD2">
+  <meta name="theme-color" content="#FFFFFF">
   <title>FIELD — a video player built like a field recorder</title>
   <meta name="description" content="FIELD is a Video.js 10 skin: putty keys over the picture, a tape counter for time, and a wheel you roll for volume.">
   <meta property="og:title" content="FIELD — a Video.js 10 skin">
@@ -17,65 +17,56 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://stream.mux.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Mono:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap">
   <script type="module" src="/src/site/main.ts"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
 
-  <!-- desktop nav -->
+  <!-- sticky local nav -->
   <header class="nav">
-    <a class="logo" href="#top" aria-label="FIELD, back to top"><span class="logo-mark" aria-hidden="true"></span>FIELD</a>
-    <div class="tape" aria-hidden="true"><span>You are at</span><span class="tape-c" data-tape>00 00 00</span></div>
-    <nav class="links" aria-label="Sections">
-      <a href="#touch">Touch</a>
-      <a href="#style">Make it yours</a>
-      <a href="#sizes">Sizes</a>
-      <a href="#states">States</a>
-      <a href="#keys" class="only-fine">Keyboard</a>
-      <a href="#keys" class="only-coarse">Gestures</a>
-      <a href="#install">Install</a>
-      <a href="#install" class="get">Get FIELD</a>
-    </nav>
-  </header>
-
-  <!-- phone top bar -->
-  <header class="topbar">
-    <a class="logo" href="#top" aria-label="FIELD, back to top"><span class="logo-mark" aria-hidden="true"></span>FIELD</a>
-    <button type="button" class="menu-key" aria-label="Menu" aria-haspopup="dialog" aria-controls="sheet"><i></i><i></i></button>
+    <a class="nav-title" href="#top">FIELD</a>
+    <div class="nav-r">
+      <nav class="links" aria-label="Sections">
+        <a href="#touch">Touch</a>
+        <a href="#style">Make it yours</a>
+        <a href="#sizes">Sizes</a>
+        <a href="#states">States</a>
+        <a href="#keys" class="only-fine">Keyboard</a>
+        <a href="#gestures" class="only-coarse">Gestures</a>
+        <a href="#install">Install</a>
+      </nav>
+      <span class="tape" data-tape title="Where you are on the page, read like tape" aria-hidden="true">00 00 00</span>
+      <a href="#install" class="pill nav-get">Get FIELD</a>
+      <button type="button" class="menu-key" aria-label="Menu" aria-haspopup="dialog" aria-controls="sheet"><i></i><i></i></button>
+    </div>
   </header>
 
   <main id="main">
     <!-- 1 · Hero -->
-    <section class="hero" id="top" aria-label="FIELD">
-      <div class="paper hero-paper">
+    <section class="hero" id="top" aria-labelledby="hero-h">
+      <p class="kicker">FIELD</p>
+      <h1 class="hero-h" id="hero-h">A video player built like a field recorder.</h1>
+      <p class="hero-body only-fine">Putty keys over the picture, a tape counter for time, and a wheel you roll for volume. While you watch, all of it steps out of the way.</p>
+      <p class="hero-body only-coarse">Roll the volume, press the key, turn your phone. Everything here is the real player.</p>
+      <div class="hero-paper">
         <div class="slot" data-player="1" data-autoplay></div>
-        <button type="button" class="key unmute unmute-over only-coarse" hidden>Sound on</button>
       </div>
-      <div class="hero-head">
-        <h1 class="hero-title">FIELD</h1>
-        <div class="hero-sub">
-          <p class="hero-lede">A video player built like a field recorder.</p>
-          <p class="hero-body only-fine">Putty keys over the picture, a tape counter for time, and a wheel you roll for volume. While you watch, all of it steps out of the way.</p>
-          <p class="hero-body only-coarse">Roll the volume, press the key, turn your phone. Everything here is the real player.</p>
-        </div>
+      <div class="try">
+        <span class="only-fine">Try it:</span>
+        <span class="try-i only-fine"><kbd>Hold</kbd>the volume key</span>
+        <span class="try-i only-fine"><kbd>K</kbd>to play and pause</span>
+        <span class="try-i only-fine"><kbd>Hover</kbd>the strip</span>
+        <button type="button" class="pill unmute" hidden>Sound on</button>
       </div>
-      <div class="try only-fine">
-        <span>Try it:</span>
-        <span class="try-i"><kbd class="key">Hold</kbd>the volume key</span>
-        <span class="try-i"><kbd class="key">K</kbd>to play and pause</span>
-        <span class="try-i"><kbd class="key">Hover</kbd>the strip</span>
-        <button type="button" class="key unmute unmute-bar" hidden>Sound on</button>
-      </div>
-      <p class="scroll-hint only-coarse"><span class="scroll-dot" aria-hidden="true"></span>Scroll for the parts you can touch</p>
     </section>
 
     <!-- 2 · Two things to touch -->
-    <section class="sec" id="touch" aria-labelledby="touch-h">
+    <section class="sec band" id="touch" aria-labelledby="touch-h">
       <h2 id="touch-h">Two things you’ll want to touch.</h2>
       <div class="touch-row">
         <figure class="touch-wheel">
-          <div class="paper stage wheel-stage">
+          <div class="panel stage wheel-stage">
             <div class="dw" data-demo-wheel>
               <button type="button" class="dw-key" aria-label="Mute">7</button>
               <div class="dw-wheel" role="slider" tabindex="0" aria-label="Volume of the player above" aria-valuemin="0" aria-valuemax="10" aria-valuenow="7">
@@ -92,7 +83,7 @@
           </figcaption>
         </figure>
         <figure class="touch-play">
-          <div class="paper stage play-stage">
+          <div class="panel stage play-stage">
             <button type="button" class="dp-key" aria-label="Play the player above"><span class="dp-icon" aria-hidden="true"></span></button>
           </div>
           <figcaption>
@@ -139,14 +130,14 @@
           </fieldset>
         </div>
         <div class="style-preview">
-          <div class="paper preview-paper"><div class="slot" data-player="2" data-theme="ink" data-park></div></div>
+          <div class="preview-paper"><div class="slot" data-player="2" data-theme="ink" data-park></div></div>
           <pre class="code" aria-label="Markup for this look"><code data-style-code></code></pre>
         </div>
       </div>
     </section>
 
     <!-- 4 · Any size -->
-    <section class="sec only-wide" id="sizes" aria-labelledby="sizes-h">
+    <section class="sec band only-wide" id="sizes" aria-labelledby="sizes-h">
       <h2 id="sizes-h">Shrink it. Nothing gets small.</h2>
       <p class="intro">Drag the handle. The player reflows by its own width, so keys fold away instead of shrinking below a thumb.</p>
       <div class="lane" data-lane>
@@ -166,7 +157,7 @@
     <section class="sec" id="states" aria-labelledby="states-h">
       <h2 id="states-h"><span class="only-fine">Twenty states. Press one.</span><span class="only-coarse">Twenty states. Swipe through.</span></h2>
       <p class="intro only-fine">Every moment the player can be in, from the first frame to a dropped connection. Press a key and the player jumps to that state. These are the real skin, not pictures.</p>
-      <div class="paper states-paper"><div class="slot" data-player="4"></div></div>
+      <div class="states-paper"><div class="slot" data-player="4"></div></div>
       <div class="desk" data-desk></div>
       <div class="chips only-narrow" data-chips role="toolbar" aria-label="Filter states">
         <button type="button" class="key" data-f="all" aria-pressed="true">All 20</button>
@@ -179,10 +170,10 @@
     </section>
 
     <!-- 7 · Keyboard (desktop) / Gestures (touch) -->
-    <section class="sec only-fine" id="keys" aria-labelledby="keys-h">
+    <section class="sec band only-fine" id="keys" aria-labelledby="keys-h">
       <h2 id="keys-h">Every control has a key.</h2>
       <div class="keys-row">
-        <div class="paper kb" data-kb aria-hidden="true"></div>
+        <div class="panel kb" data-kb aria-hidden="true"></div>
         <div class="facts">
           <p class="facts-lede">Press any key on your keyboard and it lights up here.</p>
           <dl>
@@ -203,10 +194,10 @@
         <div><b>20</b><span>States a screen reader names out loud</span></div>
       </div>
     </section>
-    <section class="sec only-coarse" id="gestures" aria-labelledby="gest-h">
+    <section class="sec band only-coarse" id="gestures" aria-labelledby="gest-h">
       <h2 id="gest-h">Every control has a gesture.</h2>
       <p class="intro">Try them on the player. Each one ticks when you’ve done it.</p>
-      <div class="paper gest-paper"><div class="slot" data-player="5" data-coarse-only></div></div>
+      <div class="gest-paper"><div class="slot" data-player="5" data-coarse-only></div></div>
       <ul class="gest" data-gest>
         <li data-g="tap2"><span class="tick" aria-hidden="true">✓</span><span><b>Double-tap a side</b><small>Skip 10 seconds</small></span></li>
         <li data-g="strip"><span class="tick" aria-hidden="true">✓</span><span><b>Drag the strip</b><small>Scrub with a preview</small></span></li>
@@ -222,13 +213,13 @@
         <li class="step">
           <span class="key n" aria-hidden="true">1</span>
           <h3>Install Video.js 10</h3>
-          <div class="code-box"><pre><code>npm install @videojs/html @videojs/mux-video</code></pre><button type="button" class="copy">Copy</button></div>
+          <div class="code-box"><pre><code>npm install @videojs/html @videojs/mux-video</code></pre><button type="button" class="copy pill-o">Copy</button></div>
         </li>
         <li class="step">
           <span class="key n" aria-hidden="true">2</span>
           <h3>Add FIELD</h3>
           <div class="code-box"><pre><code>&lt;link rel="stylesheet" href="field.css"&gt;
-&lt;script type="module" src="field.js"&gt;&lt;/script&gt;</code></pre><button type="button" class="copy">Copy</button></div>
+&lt;script type="module" src="field.js"&gt;&lt;/script&gt;</code></pre><button type="button" class="copy pill-o">Copy</button></div>
         </li>
         <li class="step">
           <span class="key n" aria-hidden="true">3</span>
@@ -238,7 +229,7 @@
     &lt;mux-video src="your-video.m3u8" playsinline&gt;&lt;/mux-video&gt;
     &lt;!-- FIELD's keys: paste from field.html --&gt;
   &lt;/media-container&gt;
-&lt;/video-player&gt;</code></pre><button type="button" class="copy">Copy</button></div>
+&lt;/video-player&gt;</code></pre><button type="button" class="copy pill-o">Copy</button></div>
         </li>
       </ol>
     </section>
@@ -260,7 +251,7 @@
   <div class="mini" data-mini hidden>
     <button type="button" class="mini-thumb" aria-label="Back to the player"><img alt="" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=168" width="84" height="48"></button>
     <div class="mini-t"><b>Caminandes 3</b><span class="mini-c" data-mini-c>00 00 00</span></div>
-    <button type="button" class="key mini-play" aria-label="Pause"><span class="dp-icon" aria-hidden="true"></span></button>
+    <button type="button" class="mini-play" aria-label="Pause"><span class="dp-icon" aria-hidden="true"></span></button>
   </div>
 
   <!-- phone dock -->
@@ -283,7 +274,7 @@
       <a class="sheet-row" href="#states"><span><b>Twenty states</b><small>Swipe through every moment</small></span><i aria-hidden="true">›</i></a>
       <a class="sheet-row" href="#gestures"><span><b>Gestures</b><small>Try them on the player</small></span><i aria-hidden="true">›</i></a>
       <a class="sheet-row" href="#install"><span><b>Install</b><small>Three steps</small></span><i aria-hidden="true">›</i></a>
-      <div class="sheet-cta"><a class="cta-get" href="#install">Get FIELD</a></div>
+      <div class="sheet-cta"><a class="pill cta-get" href="#install">Get FIELD</a></div>
     </div>
   </div>
 

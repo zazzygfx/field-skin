@@ -39,7 +39,6 @@ function mountSlot(slot: HTMLElement): Player | null {
   players.set(n, p);
   // one picture with sound at a time: starting one pauses the others
   media.addEventListener('play', () => {
-    if (parking.has(p)) return;
     if (root.getAttribute('data-field-force') === 'demo') root.removeAttribute('data-field-force');
     p.displaced = false;
     for (const o of players.values())
@@ -55,13 +54,17 @@ function mountSlot(slot: HTMLElement): Player | null {
 }
 
 /** Demo players wait paused mid-film with their keys showing (no pause shelf). */
-const parking = new Set<Player>();
 async function park(p: Player) {
-  parking.add(p);
-  await p.media.play().catch(() => {});
-  p.media.pause();
-  p.media.currentTime = 83.4;
-  parking.delete(p);
+  const m = p.media;
+  m.setAttribute('preload', 'auto');
+  (m as HTMLMediaElement & { preload: string }).preload = 'auto';
+  if (m.readyState < 1) {
+    await new Promise<void>((res) => {
+      m.addEventListener('loadedmetadata', () => res(), { once: true });
+      setTimeout(res, 8000);
+    });
+  }
+  m.currentTime = 83.4;
   p.root.setAttribute('data-field-force', 'demo');
   (p.root as HTMLElement & { fieldDev?: { render: () => void } }).fieldDev?.render();
 }
@@ -687,7 +690,7 @@ if (coarse.matches) {
 /* ----------------------------------- status bar colour while fullscreen */
 {
   const meta = $<HTMLMetaElement>('meta[name="theme-color"]')!;
-  const sync = () => (meta.content = document.fullscreenElement ? '#17160F' : '#DEDBD2');
+  const sync = () => (meta.content = document.fullscreenElement ? '#000000' : '#FFFFFF');
   document.addEventListener('fullscreenchange', sync);
   document.addEventListener('webkitfullscreenchange', sync);
 }

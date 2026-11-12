@@ -79,6 +79,7 @@ export function mountTheme(root: HTMLElement): void {
     // a new accent written over our correction is a new request
     if (root.dataset.fieldAccentGuard && root.style.getPropertyValue('--field-accent').trim() !== lastHex) {
       delete root.dataset.fieldAccentGuard;
+      last = ''; // even the same colour again needs checking: our correction was overwritten
     }
     const guard = root.dataset.fieldAccentGuard;
     const requested = guard ? (guard === 'theme' ? '' : guard) : root.style.getPropertyValue('--field-accent').trim();

@@ -1,7 +1,7 @@
 # FIELD — handoff
 
 Status as of 12 Nov 2026. Deadline: **Mon 16 Nov 2026, 11:59 pm PST**.
-Steps 1–7 of the build order in `CLAUDE.md` are done and committed. Steps 8–9 are not started.
+Steps 1–8 of the build order in `CLAUDE.md` are done and committed (step 8 = showcase site, deployed as a draft). Step 9 is not started.
 
 ## Run it
 
@@ -10,7 +10,7 @@ npm install
 npm run dev -- --host --port 5174
 ```
 
-- Dev page: `index.html`. Press **Shift+D** for the dev panel (20 states, themes, accent test).
+- Site: `index.html`. Dev player: `dev.html` — press **Shift+D** for the dev panel (20 states, themes, accent test).
 - URL params on the dev page: `?theme=putty|ink|liquid|holiday-snow|holiday-pine`, `?accent=%23RRGGBB`, `?w=<px>` (stage width), `?ua=ios` (fake iOS).
 - In-app browser testing tip: a hidden pane freezes animations, transitions and ResizeObserver. Inject `.field *{animation:none!important;transition:none!important}` and read values from JS.
 
@@ -53,16 +53,16 @@ All are recorded in `SPEC.md`; designer overrides beat Figma.
 - **Quality order** — Auto first, then high → low (actual list reordered); "Auto (720p)" shown as "Auto" in the More sheet.
 - **Captions track** — the stream's "Unknown language CC" track is hidden in every captions menu. Cue styles are injected into mux-video's shadow root; captions lifted clear of the strip.
 - **Key sounds** — new feature: Web Audio tick / clunk / detent / menu. **Off by default**, toggle in Settings, saved in localStorage `field:key-sounds`, never plays while muted.
-- **Themes + guard** — if `--field-accent` is under 3:1 against the key colour it is darkened in 4% steps (lightened on dark keys); translucent keys are judged over a dark frame; the original request is remembered so theme switches re-check from it. Known effect: default `#FF4D00` is 2.75:1 on Putty, so it renders as `#F54A00`. **Open question for the designer: keep the guard or exempt the brand orange.**
+- **Themes + guard** — if `--field-accent` is under 3:1 against the key colour it is darkened in 4% steps (lightened on dark keys); translucent keys are judged over a dark frame; the original request is remembered so theme switches re-check from it. Known effect: default `#FF4D00` is 2.75:1 on Putty, so it renders as `#F54A00`. **Decided: keep the guard; `#F54A00` on Putty is fine.** Re-picking the same colour now re-runs the guard (fix in `theme.ts`).
 - **Assets** — chapters and captions VTT live in `public/` (not `assets/`).
 
 ## What's left
 
-**Step 8 — showcase site + deploy**
-- Build the site from `SITE.md` against Figma `182:559` (desktop) and `186:642` (mobile).
-- Film credit on the site: *Caminandes 3: Llamigos* © Blender Foundation, CC BY 3.0.
-- Optional **sticky mini player** (step 6 extra, not built).
-- Deploy to Netlify production (`--prod`) once the designer approves.
+**Step 8 — showcase site (done as a draft)**
+- `index.html` is now the site (`src/site/`); the player alone with Shift+D lives at `dev.html`.
+- Players are generated from `src/site/player.ts` (made from `dev.html`, ids numbered per player); the state forcing is shared in `src/dev/runner.ts`.
+- Not built from the Figma: the "Made for two thumbs" phone section (upright/sideways renders + QR) and the GitHub link (no repo yet).
+- Production deploy (`--prod`) still waits for the designer.
 
 **Step 9 — checks + submit**
 - Run `CHECKLIST.md` end to end and fix everything.
@@ -70,4 +70,7 @@ All are recorded in `SPEC.md`; designer overrides beat Figma.
 - Check caption timings against the film (`public/captions-en.vtt` note).
 - Reduced-transparency Liquid fallback has not been seen running (couldn't emulate it) — check on a real device.
 - Check Liquid's phone More sheet (48% black glass) on a phone.
+- Package `field.js` / `field.css` / `field.html` so the site's install steps are literally true.
+- Lighthouse: the Video.js + HLS bundle is ~264 kB gzipped; check Performance ≥ 90.
+- Real-phone pass on the site: mini player, dock, sheet drag, swatch carousel, state cards, gesture ticks.
 - Submit to the Contra × Mux challenge before the deadline.

@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  FIELD — a Video.js 10 skin
+  FIELD — a Video.js 10 skin · showcase site
   Copyright 2026 Zazzy (@zazzygfx) · Licensed under the Apache License, Version 2.0
 -->
 <html lang="en">
@@ -8,329 +8,285 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — step 7</title>
+  <title>FIELD — a video player built like a field recorder</title>
+  <meta name="description" content="FIELD is a Video.js 10 skin: putty keys over the picture, a tape counter for time, and a wheel you roll for volume.">
+  <meta property="og:title" content="FIELD — a Video.js 10 skin">
+  <meta property="og:description" content="A video player built like a field recorder.">
+  <meta property="og:image" content="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.png?time=21&width=1200">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
-  <style>
-    html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
-    body {
-      margin: 0;
-      min-height: 100svh;
-      background: #F4F2EC;
-      color: #17160F;
-      font-family: "DM Sans", system-ui, sans-serif;
-    }
-    main { width: min(var(--stage-w, 1180px), 100% - 32px); margin: 48px auto; }
-    .stage video-player { display: block; }
-        .dev-panel { position: fixed; right: 16px; bottom: 16px; z-index: 1000; width: 300px; padding: 12px; border: 1px solid #CBC7B8; border-radius: 14px; background: #F4F2EC; box-shadow: 0 2px 0 rgb(23 22 15 / .35), 0 12px 32px rgb(23 22 15 / .18); font: 12px/1.3 "DM Sans", system-ui, sans-serif; color: #17160F; }
-    .dev-panel[hidden] { display: none; }
-    .dev-panel header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .dev-panel header span { font: 10px "Space Mono", monospace; opacity: .6; }
-    .dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .dev-panel button { display: flex; gap: 6px; align-items: center; min-height: 30px; padding: 0 8px; border: 1px solid #CBC7B8; border-radius: 8px; background: #EDEBE2; font: 600 12px "DM Sans", system-ui, sans-serif; color: #17160F; text-align: left; cursor: pointer; }
-    .dev-panel button span { font: 10px "Space Mono", monospace; opacity: .6; }
-    .dev-panel button[data-on] { background: #FF4D00; border-color: #C23A00; color: #FFF6EF; }
-    .dev-panel .dev-reset { width: 100%; justify-content: center; margin-top: 8px; }
-    .dev-panel .dev-sub { margin: 10px 0 6px; }
-    .dev-themes { display: flex; flex-wrap: wrap; gap: 4px; }
-    .dev-now { margin: 8px 0 0; font: 11px "Space Mono", monospace; opacity: .7; }
-    .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
-  </style>
-  <script>
-    // dev: ?w=364 sets the player width (XL 1180 · M 846 · S 500 · XS 364)
-    const w = new URLSearchParams(location.search).get('w');
-    if (w) document.documentElement.style.setProperty('--stage-w', parseInt(w, 10) + 'px');
-    // dev: ?ua=ios pretends to be an iPhone (to check the mute-only volume key)
-    if (new URLSearchParams(location.search).get('ua') === 'ios') {
-      Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
-    }
-  </script>
-  <script type="module" src="/src/main.ts"></script>
+  <link rel="preconnect" href="https://stream.mux.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Mono:wght@400;700&display=swap">
+  <script type="module" src="/src/site/main.ts"></script>
 </head>
 <body>
-  <main>
-    <div class="stage">
-      <video-player>
-        <media-container class="field" data-field-theme="putty">
-          <mux-video
-            data-field-media
-            src="https://stream.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU.m3u8"
-            playsinline
-            crossorigin="anonymous"
-            preload="metadata">
-            <track kind="chapters" src="/chapters.vtt" srclang="en" label="Chapters" default>
-            <track kind="captions" src="/captions-en.vtt" srclang="en" label="English">
-          </mux-video>
+  <a class="skip" href="#main">Skip to content</a>
 
-          <media-poster class="field-poster">
-            <img alt="" decoding="async" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21">
-          </media-poster>
+  <!-- desktop nav -->
+  <header class="nav">
+    <a class="logo" href="#top" aria-label="FIELD, back to top"><span class="logo-mark" aria-hidden="true"></span>FIELD</a>
+    <div class="tape" aria-hidden="true"><span>You are at</span><span class="tape-c" data-tape>00 00 00</span></div>
+    <nav class="links" aria-label="Sections">
+      <a href="#touch">Touch</a>
+      <a href="#style">Make it yours</a>
+      <a href="#sizes">Sizes</a>
+      <a href="#states">States</a>
+      <a href="#keys" class="only-fine">Keyboard</a>
+      <a href="#keys" class="only-coarse">Gestures</a>
+      <a href="#install">Install</a>
+      <a href="#install" class="get">Get FIELD</a>
+    </nav>
+  </header>
 
-          <div class="field-chip">
-            <span class="field-chip-badge" hidden></span>
-            <span class="field-chip-title">Caminandes 3: Llamigos</span>
-            <span class="field-chip-status" hidden></span>
-          </div>
-          <button type="button" class="field-golive" hidden><span class="field-golive-dot" aria-hidden="true"></span>Go to live</button>
+  <!-- phone top bar -->
+  <header class="topbar">
+    <a class="logo" href="#top" aria-label="FIELD, back to top"><span class="logo-mark" aria-hidden="true"></span>FIELD</a>
+    <button type="button" class="menu-key" aria-label="Menu" aria-haspopup="dialog" aria-controls="sheet"><i></i><i></i></button>
+  </header>
 
-          <div class="field-rail" aria-hidden="true"></div>
+  <main id="main">
+    <!-- 1 · Hero -->
+    <section class="hero" id="top" aria-label="FIELD">
+      <div class="paper hero-paper">
+        <div class="slot" data-player="1" data-autoplay></div>
+        <button type="button" class="key unmute unmute-over only-coarse" hidden>Sound on</button>
+      </div>
+      <div class="hero-head">
+        <h1 class="hero-title">FIELD</h1>
+        <div class="hero-sub">
+          <p class="hero-lede">A video player built like a field recorder.</p>
+          <p class="hero-body only-fine">Putty keys over the picture, a tape counter for time, and a wheel you roll for volume. While you watch, all of it steps out of the way.</p>
+          <p class="hero-body only-coarse">Roll the volume, press the key, turn your phone. Everything here is the real player.</p>
+        </div>
+      </div>
+      <div class="try only-fine">
+        <span>Try it:</span>
+        <span class="try-i"><kbd class="key">Hold</kbd>the volume key</span>
+        <span class="try-i"><kbd class="key">K</kbd>to play and pause</span>
+        <span class="try-i"><kbd class="key">Hover</kbd>the strip</span>
+        <button type="button" class="key unmute unmute-bar" hidden>Sound on</button>
+      </div>
+      <p class="scroll-hint only-coarse"><span class="scroll-dot" aria-hidden="true"></span>Scroll for the parts you can touch</p>
+    </section>
 
-          <div class="field-hints" aria-hidden="true" hidden>
-            <span><kbd>K</kbd>Play</span>
-            <span><kbd>J</kbd><kbd>L</kbd>10s</span>
-            <span><kbd>↑</kbd><kbd>↓</kbd>Volume</span>
-            <span><kbd>M</kbd>Mute</span>
-            <span><kbd>C</kbd>Captions</span>
-            <span><kbd>&lt;</kbd><kbd>&gt;</kbd>Speed</span>
-            <span><kbd>P</kbd>PiP</span>
-            <span><kbd>F</kbd>Full</span>
-          </div>
-
-          <div class="field-center">
-            <media-play-button class="field-key field-play field-bigplay" id="field-bigplay-1">
-              <span class="field-icon" data-icon="pause"></span>
-              <span class="field-icon" data-icon="play"></span>
-              <span class="field-icon" data-icon="replay"></span>
-            </media-play-button>
-            <div class="field-ready">
-              <p class="field-ready-title">Caminandes 3: Llamigos</p>
-              <p class="field-ready-meta"><span class="field-ready-length">2:30</span> · Blender Foundation</p>
-            </div>
-          </div>
-
-          <div class="field-ended" hidden>
-            <media-play-button class="field-again">Watch again?</media-play-button>
-            <p class="field-ended-meta">Caminandes 3: Llamigos · <span class="field-ready-length">2:30</span></p>
-          </div>
-
-          <div class="field-error" role="alertdialog" aria-labelledby="field-error-title-1" aria-describedby="field-error-text-1" hidden>
-            <div class="field-error-card">
-              <p class="field-error-title" id="field-error-title-1">Can’t play this video</p>
-              <p class="field-error-text" id="field-error-text-1">The stream stopped responding. Check your connection and try again.</p>
-              <button type="button" class="field-error-retry">Try again</button>
-            </div>
-          </div>
-
-          <div class="field-pipnote" hidden>
-            <p>Playing in picture-in-picture</p>
-            <button type="button" class="field-pip-back">Bring it back here</button>
-          </div>
-
-          <div class="field-shelf" popover="manual" role="dialog" aria-label="Paused">
-            <button type="button" class="field-shelf-row field-shelf-restart"><span>Start over</span><span class="field-shelf-time">00:00</span></button>
-            <div class="field-shelf-chapters" hidden>
-              <p class="field-shelf-label">Chapters · from the video</p>
-              <div class="field-shelf-list" role="list"></div>
-            </div>
-            <div class="field-shelf-jumps">
-              <button type="button" data-jump="-30">−30s</button>
-              <button type="button" data-jump="-10">−10s</button>
-              <button type="button" data-jump="10">+10s</button>
-              <button type="button" data-jump="30">+30s</button>
-            </div>
-            <p class="field-shelf-esc" aria-hidden="true"><kbd>Esc</kbd>hide</p>
-          </div>
-
-          <media-controls class="field-controls">
-            <media-controls-backdrop class="field-scrim"></media-controls-backdrop>
-            <media-controls-content class="field-controls-content">
-              <media-tooltip-group delay="600" close-delay="0" class="field-tooltip-group">
-
-              <div class="field-strip">
-                <media-time-slider class="field-strip-slider" label="Seek">
-                  <media-time-slider-chapters class="field-strip-chapters">
-                    <template>
-                      <div class="field-strip-chapter">
-                        <media-slider-track class="field-strip-track">
-                          <media-slider-buffer class="field-strip-buffer"></media-slider-buffer>
-                        </media-slider-track>
-                      </div>
-                    </template>
-                  </media-time-slider-chapters>
-                  <media-slider-fill class="field-strip-fill"></media-slider-fill>
-                  <media-slider-thumb class="field-needle"></media-slider-thumb>
-                  <div class="field-scrub" aria-hidden="true">
-                    <div class="field-scrub-ghost"></div>
-                    <div class="field-scrub-tag"></div>
-                    <div class="field-scrub-preview">
-                      <media-slider-thumbnail class="field-scrub-frame"><img alt="" decoding="async"></media-slider-thumbnail>
-                      <div class="field-scrub-label"></div>
-                    </div>
-                  </div>
-                </media-time-slider>
+    <!-- 2 · Two things to touch -->
+    <section class="sec" id="touch" aria-labelledby="touch-h">
+      <h2 id="touch-h">Two things you’ll want to touch.</h2>
+      <div class="touch-row">
+        <figure class="touch-wheel">
+          <div class="paper stage wheel-stage">
+            <div class="dw" data-demo-wheel>
+              <button type="button" class="dw-key" aria-label="Mute">7</button>
+              <div class="dw-wheel" role="slider" tabindex="0" aria-label="Volume of the player above" aria-valuemin="0" aria-valuemax="10" aria-valuenow="7">
+                <div class="dw-slot"><div class="dw-ribs"></div></div>
+                <div class="dw-index" aria-hidden="true"></div>
+                <div class="dw-detents" aria-hidden="true"></div>
               </div>
+            </div>
+            <p class="drag-hint only-coarse" aria-hidden="true">← drag here →</p>
+          </div>
+          <figcaption>
+            <h3>Roll for volume</h3>
+            <p>Hold the volume key and a wheel unrolls from it, right where the key was. Ten clicks from silent to full. Tap the key once to mute. This one drives the player at the top.</p>
+          </figcaption>
+        </figure>
+        <figure class="touch-play">
+          <div class="paper stage play-stage">
+            <button type="button" class="dp-key" aria-label="Play the player above"><span class="dp-icon" aria-hidden="true"></span></button>
+          </div>
+          <figcaption>
+            <h3>The key that sinks</h3>
+            <p>The play key is the biggest thing on the row and the only one that moves when you press it: it sinks like a tape-deck transport, then springs back.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
 
-              <div class="field-row">
-                <media-controls-group class="field-pill field-pill-left" aria-label="Position and volume">
-                  <span class="field-keybubble" aria-hidden="true" hidden></span>
-                  <span class="field-counter" aria-hidden="true">-- -- --</span>
-                  <media-seek-button class="field-key" id="field-back-1" seconds="-10" label="Back 10 seconds" aria-keyshortcuts="J">−10</media-seek-button>
-                  <media-tooltip trigger="field-back-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <media-mute-button class="field-key field-key-icon field-vol" id="field-mute-1" aria-keyshortcuts="M">
-                    <span class="field-icon" data-icon="volume"></span>
-                    <span class="field-vol-num" aria-hidden="true"></span>
-                  </media-mute-button>
-                  <media-tooltip trigger="field-mute-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <div class="field-wheel" role="slider" tabindex="-1" aria-label="Volume" aria-valuemin="0" aria-valuemax="10" hidden>
-                    <div class="field-wheel-slot"><div class="field-wheel-drum"></div><div class="field-wheel-ribs"></div></div>
-                    <div class="field-wheel-index"></div>
-                    <div class="field-wheel-detents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                  </div>
-                  <media-seek-button class="field-key" id="field-fwd-1" seconds="10" label="Forward 10 seconds" aria-keyshortcuts="L">+10</media-seek-button>
-                  <media-tooltip trigger="field-fwd-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                </media-controls-group>
+    <!-- 3 · Make it yours -->
+    <section class="sec" id="style" aria-labelledby="style-h">
+      <h2 id="style-h">Make it yours with two choices.</h2>
+      <p class="intro">Pick what the keys are made of and the one colour that marks where you are. Everything else stays the same.</p>
+      <div class="style-row">
+        <div class="style-controls">
+          <fieldset class="group">
+            <legend>Material</legend>
+            <div class="seg" data-seg="material">
+              <button type="button" class="key" data-v="putty" aria-pressed="false">Putty</button>
+              <button type="button" class="key" data-v="ink" aria-pressed="true">Ink</button>
+              <button type="button" class="key" data-v="liquid" aria-pressed="false">Liquid</button>
+            </div>
+          </fieldset>
+          <fieldset class="group">
+            <legend>Accent</legend>
+            <div class="swatches" data-swatches>
+              <button type="button" class="key sw" data-c="#FF4D00" aria-pressed="true" aria-label="Orange"><i style="background:#FF4D00"></i></button>
+              <button type="button" class="key sw" data-c="#2F5BFF" aria-pressed="false" aria-label="Cobalt"><i style="background:#2F5BFF"></i></button>
+              <button type="button" class="key sw" data-c="#1E8E4E" aria-pressed="false" aria-label="Green"><i style="background:#1E8E4E"></i></button>
+              <button type="button" class="key sw" data-c="#E5336B" aria-pressed="false" aria-label="Pink"><i style="background:#E5336B"></i></button>
+              <button type="button" class="key sw" data-c="#E9C77B" aria-pressed="false" aria-label="Sand, too light: watch the guard"><i style="background:#E9C77B"></i></button>
+              <label class="key sw pick" aria-label="Pick any colour"><span aria-hidden="true">+</span><input type="color" value="#FFE14D" data-pick></label>
+            </div>
+            <p class="small" data-guard-note>Too light a pick gets darkened until it’s readable on the keys.</p>
+          </fieldset>
+          <fieldset class="group">
+            <legend>Season</legend>
+            <div class="seg" data-seg="season">
+              <button type="button" class="key" data-v="off" aria-pressed="true">Off</button>
+              <button type="button" class="key" data-v="snow" aria-pressed="false">Snow</button>
+              <button type="button" class="key" data-v="pine" aria-pressed="false">Pine</button>
+            </div>
+          </fieldset>
+        </div>
+        <div class="style-preview">
+          <div class="paper preview-paper"><div class="slot" data-player="2" data-theme="ink" data-park></div></div>
+          <pre class="code" aria-label="Markup for this look"><code data-style-code></code></pre>
+        </div>
+      </div>
+    </section>
 
-                <div class="field-row-gap"></div>
+    <!-- 4 · Any size -->
+    <section class="sec only-wide" id="sizes" aria-labelledby="sizes-h">
+      <h2 id="sizes-h">Shrink it. Nothing gets small.</h2>
+      <p class="intro">Drag the handle. The player reflows by its own width, so keys fold away instead of shrinking below a thumb.</p>
+      <div class="lane" data-lane>
+        <div class="lane-player" data-lane-player><div class="slot" data-player="3" data-park></div></div>
+        <div class="lane-side">
+          <div class="handle" role="slider" tabindex="0" aria-label="Player width" aria-valuemin="320" aria-valuenow="820" data-handle><i></i><i></i><i></i></div>
+          <p class="readout" aria-live="polite"><b data-size-badge>M</b><span data-size-text>820 px — speed and PiP moved into Settings</span></p>
+        </div>
+      </div>
+      <div class="ruler" data-ruler aria-hidden="true">
+        <div class="ruler-line"></div>
+        <div class="ruler-now" data-ruler-now></div>
+      </div>
+    </section>
 
-                <media-controls-group class="field-pill field-pill-right" aria-label="Playback options">
-                  <media-captions-button class="field-key field-key-icon" id="field-cc-1" aria-keyshortcuts="C">
-                    <span class="field-icon" data-icon="captions"></span>
-                  </media-captions-button>
-                  <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip field-tooltip-cc"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut><span class="field-tooltip-alt">No captions for this video</span></media-tooltip>
-                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5" aria-haspopup="true" aria-expanded="false">
-                    <span class="field-speed-label" aria-hidden="true">1×</span>
-                    <span class="field-speed-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-                  </media-playback-rate-button>
-                  <div class="field-tray" role="radiogroup" aria-label="Playback speed" hidden></div>
-                  <media-tooltip trigger="field-speed-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <media-pip-button class="field-key field-key-icon" id="field-pip-1" aria-keyshortcuts="P">
-                    <span class="field-icon" data-icon="pip"></span>
-                  </media-pip-button>
-                  <media-tooltip trigger="field-pip-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <button type="button" class="field-key field-key-icon field-settings" id="field-settings-key-1" commandfor="field-settings-1" aria-label="Settings">
-                    <span class="field-icon" data-icon="settings"></span>
-                  </button>
-                  <media-tooltip trigger="field-settings-key-1" side="top" class="field-tooltip"><span>Settings</span></media-tooltip>
-                  <media-fullscreen-button class="field-key field-key-icon" id="field-fs-1" aria-keyshortcuts="F">
-                    <span class="field-icon" data-icon="fullscreen"></span>
-                    <span class="field-icon" data-icon="fullscreen-exit"></span>
-                  </media-fullscreen-button>
-                  <media-tooltip trigger="field-fs-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                </media-controls-group>
+    <!-- 5 · States -->
+    <section class="sec" id="states" aria-labelledby="states-h">
+      <h2 id="states-h"><span class="only-fine">Twenty states. Press one.</span><span class="only-coarse">Twenty states. Swipe through.</span></h2>
+      <p class="intro only-fine">Every moment the player can be in, from the first frame to a dropped connection. Press a key and the player jumps to that state. These are the real skin, not pictures.</p>
+      <div class="paper states-paper"><div class="slot" data-player="4"></div></div>
+      <div class="desk" data-desk></div>
+      <div class="chips only-narrow" data-chips role="toolbar" aria-label="Filter states">
+        <button type="button" class="key" data-f="all" aria-pressed="true">All 20</button>
+        <button type="button" class="key" data-f="playing" aria-pressed="false">Playing</button>
+        <button type="button" class="key" data-f="any" aria-pressed="false">Any video</button>
+        <button type="button" class="key" data-f="settings" aria-pressed="false">Settings</button>
+      </div>
+      <div class="cards only-narrow" data-cards></div>
+      <p class="pager only-narrow" aria-live="polite"><span class="dots" data-dots aria-hidden="true"></span><span data-pager>1 of 20</span></p>
+    </section>
 
-                <media-play-button class="field-key field-play" id="field-play-1" aria-keyshortcuts="K">
-                  <span class="field-icon" data-icon="pause"></span>
-                  <span class="field-icon" data-icon="play"></span>
-                  <span class="field-icon" data-icon="replay"></span>
-                    </media-play-button>
-                <media-tooltip trigger="field-play-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-              </div>
+    <!-- 7 · Keyboard (desktop) / Gestures (touch) -->
+    <section class="sec only-fine" id="keys" aria-labelledby="keys-h">
+      <h2 id="keys-h">Every control has a key.</h2>
+      <div class="keys-row">
+        <div class="paper kb" data-kb aria-hidden="true"></div>
+        <div class="facts">
+          <p class="facts-lede">Press any key on your keyboard and it lights up here.</p>
+          <dl>
+            <div><dt>K or Space</dt><dd>Play and pause</dd></div>
+            <div><dt>J and L</dt><dd>Back or forward 10 seconds</dd></div>
+            <div><dt>Arrows up and down</dt><dd>Roll the volume wheel</dd></div>
+            <div><dt>&lt; and &gt;</dt><dd>Slower or faster</dd></div>
+            <div><dt>M, C, P, F</dt><dd>Mute, captions, picture-in-picture, fullscreen</dd></div>
+            <div><dt>0 to 9</dt><dd>Jump to that tenth of the video</dd></div>
+          </dl>
+          <p class="small">Keys work while the player has focus. Click it, or Tab to it.</p>
+        </div>
+      </div>
+      <div class="access">
+        <div><b>44 px</b><span>Smallest hit area on any key</span></div>
+        <div><b>10 : 1</b><span>Ink on keys, lowest contrast in any theme</span></div>
+        <div><b>3 : 1</b><span>Accent floor, kept by the contrast guard</span></div>
+        <div><b>20</b><span>States a screen reader names out loud</span></div>
+      </div>
+    </section>
+    <section class="sec only-coarse" id="gestures" aria-labelledby="gest-h">
+      <h2 id="gest-h">Every control has a gesture.</h2>
+      <p class="intro">Try them on the player. Each one ticks when you’ve done it.</p>
+      <div class="paper gest-paper"><div class="slot" data-player="5" data-coarse-only></div></div>
+      <ul class="gest" data-gest>
+        <li data-g="tap2"><span class="tick" aria-hidden="true">✓</span><span><b>Double-tap a side</b><small>Skip 10 seconds</small></span></li>
+        <li data-g="strip"><span class="tick" aria-hidden="true">✓</span><span><b>Drag the strip</b><small>Scrub with a preview</small></span></li>
+        <li data-g="vol"><span class="tick" aria-hidden="true">✓</span><span><b>Tap the volume key</b><small data-vol-sub>Roll the wheel</small></span></li>
+        <li data-g="speed"><span class="tick" aria-hidden="true">✓</span><span><b>Hold the speed key</b><small>All seven speeds</small></span></li>
+      </ul>
+    </section>
 
-              <media-menu id="field-settings-1" class="field-menu" side="top" align="end">
-                <media-menu-content class="field-menu-content">
-                  <media-menu-group class="field-group field-group-speed">
-                    <media-menu-group-label class="field-group-label">Speed</media-menu-group-label>
-                    <media-playback-rate-radio-group class="field-chips">
-                      <template>
-                        <media-menu-radio-item class="field-chip-option"><span data-part="label"></span></media-menu-radio-item>
-                      </template>
-                    </media-playback-rate-radio-group>
-                  </media-menu-group>
-                  <media-menu-group class="field-group field-group-quality">
-                    <media-menu-group-label class="field-group-label">Quality · from the stream</media-menu-group-label>
-                    <media-quality-radio-group class="field-options">
-                      <template>
-                        <media-menu-radio-item class="field-option">
-                          <span data-part="label"></span>
-                          <span class="field-option-value"><span data-part="badge"></span><media-menu-item-indicator class="field-check">✓</media-menu-item-indicator></span>
-                        </media-menu-radio-item>
-                      </template>
-                    </media-quality-radio-group>
-                  </media-menu-group>
-                  <media-menu-group class="field-group field-group-captions">
-                    <media-menu-group-label class="field-group-label">Captions · from the stream</media-menu-group-label>
-                    <media-captions-radio-group class="field-options">
-                      <template>
-                        <media-menu-radio-item class="field-option">
-                          <span data-part="label"></span>
-                          <span class="field-option-value"><span data-part="badge"></span><media-menu-item-indicator class="field-check">✓</media-menu-item-indicator></span>
-                        </media-menu-radio-item>
-                      </template>
-                    </media-captions-radio-group>
-                  </media-menu-group>
-                  <media-menu-group class="field-group field-group-more">
-                    <media-menu-item class="field-option field-more-pip" data-field-proxy="field-pip-1"><span>Picture-in-picture</span><span class="field-option-value">P</span></media-menu-item>
-                    <media-menu-item class="field-option field-more-fs" data-field-proxy="field-fs-1"><span>Fullscreen</span><span class="field-option-value">F</span></media-menu-item>
-                  </media-menu-group>
-                  <media-menu-group class="field-group">
-                    <media-menu-group-label class="field-group-label">Key sounds</media-menu-group-label>
-                    <div class="field-row-item">
-                      <span>Tape clicks on keys</span>
-                      <media-menu-radio-group class="field-seg" value="off" aria-label="Tape clicks on keys" data-field-key-sounds>
-                        <media-menu-radio-item value="off">Off</media-menu-radio-item>
-                        <media-menu-radio-item value="on">On</media-menu-radio-item>
-                      </media-menu-radio-group>
-                    </div>
-                  </media-menu-group>
-                </media-menu-content>
-              </media-menu>
-
-              <!-- Touch: one short list, 52px rows, value on the right; › opens one level of choices -->
-              <media-menu id="field-more-1" class="field-menu field-more" side="top" align="end">
-                <media-menu-content class="field-more-page">
-                  <media-menu-item commandfor="field-more-speed-1" class="field-more-row"><span>Speed</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
-                  <media-menu-item commandfor="field-more-quality-1" class="field-more-row"><span>Quality</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
-                  <media-menu-item commandfor="field-more-cc-1" class="field-more-row"><span>Captions</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
-                  <media-menu-item commandfor="field-more-ch-1" class="field-more-row field-more-chapters-row"><span>Chapters</span><span class="field-more-value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
-                  <media-menu-item class="field-more-row" data-field-proxy="field-pip-1"><span>Picture-in-picture</span></media-menu-item>
-                  <media-menu-item class="field-more-row field-more-fsrow" data-field-proxy="field-fs-1"><span>Fullscreen</span></media-menu-item>
-                  <media-menu-item class="field-more-row field-more-ks"><span>Key sounds</span><span class="field-more-value field-more-ks-value">Off</span></media-menu-item>
-                </media-menu-content>
-
-                <media-menu-content id="field-more-speed-1" class="field-more-page">
-                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Speed</span></media-menu-item>
-                  <media-playback-rate-radio-group class="field-more-options">
-                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
-                  </media-playback-rate-radio-group>
-                </media-menu-content>
-
-                <media-menu-content id="field-more-quality-1" class="field-more-page">
-                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Quality</span></media-menu-item>
-                  <media-quality-radio-group class="field-more-options">
-                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
-                  </media-quality-radio-group>
-                </media-menu-content>
-
-                <media-menu-content id="field-more-cc-1" class="field-more-page">
-                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Captions</span></media-menu-item>
-                  <media-captions-radio-group class="field-more-options">
-                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
-                  </media-captions-radio-group>
-                </media-menu-content>
-
-                <media-menu-content id="field-more-ch-1" class="field-more-page field-more-chapters">
-                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Chapters</span></media-menu-item>
-                  <media-menu-item class="field-more-row field-more-restart"><span>Start over</span><span class="field-more-value">00:00</span></media-menu-item>
-                </media-menu-content>
-              </media-menu>
-              </media-tooltip-group>
-            </media-controls-content>
-          </media-controls>
-
-          <media-hotkey keys="Space" action="togglePaused"></media-hotkey>
-          <media-hotkey keys="k" action="togglePaused"></media-hotkey>
-          <media-hotkey keys="m" action="toggleMuted"></media-hotkey>
-          <media-hotkey keys="ArrowRight" action="seekStep" value="10"></media-hotkey>
-          <media-hotkey keys="ArrowLeft" action="seekStep" value="-10"></media-hotkey>
-          <media-hotkey keys="l" action="seekStep" value="10"></media-hotkey>
-          <media-hotkey keys="j" action="seekStep" value="-10"></media-hotkey>
-          <media-hotkey keys="0-9" action="seekToPercent"></media-hotkey>
-          <media-hotkey keys=">" action="speedUp"></media-hotkey>
-          <media-hotkey keys="<" action="speedDown"></media-hotkey>
-          <media-hotkey keys="f" action="toggleFullscreen"></media-hotkey>
-          <media-hotkey keys="c" action="toggleSubtitles"></media-hotkey>
-          <media-hotkey keys="p" action="togglePictureInPicture"></media-hotkey>
-          <media-gesture type="tap" action="togglePaused" pointer="mouse" region="center"></media-gesture>
-          <media-gesture type="tap" action="toggleControls" pointer="touch"></media-gesture>
-          <media-gesture type="doubletap" action="seekStep" value="-10" region="left" pointer="touch"></media-gesture>
-          <media-gesture type="doubletap" action="seekStep" value="10" region="right" pointer="touch"></media-gesture>
-          <media-seek-indicator class="field-seek-ripple" aria-hidden="true"><media-seek-indicator-value class="field-seek-bubble"></media-seek-indicator-value></media-seek-indicator>
-          <media-status-announcer class="field-sr"></media-status-announcer>
-        </media-container>
-      </video-player>
-    </div>
-    <p class="note">Step 7 · themes. ?theme=ink|liquid|holiday-snow|holiday-pine · ?accent=%23FFE14D · Shift+D for states + themes. Try ?w=846, ?w=500, ?w=364. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <!-- 8 · Install -->
+    <section class="sec" id="install" aria-labelledby="install-h">
+      <h2 id="install-h">Add it to your page.</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="key n" aria-hidden="true">1</span>
+          <h3>Install Video.js 10</h3>
+          <div class="code-box"><pre><code>npm install @videojs/html @videojs/mux-video</code></pre><button type="button" class="copy">Copy</button></div>
+        </li>
+        <li class="step">
+          <span class="key n" aria-hidden="true">2</span>
+          <h3>Add FIELD</h3>
+          <div class="code-box"><pre><code>&lt;link rel="stylesheet" href="field.css"&gt;
+&lt;script type="module" src="field.js"&gt;&lt;/script&gt;</code></pre><button type="button" class="copy">Copy</button></div>
+        </li>
+        <li class="step">
+          <span class="key n" aria-hidden="true">3</span>
+          <h3>Drop in your video</h3>
+          <div class="code-box"><pre><code>&lt;video-player&gt;
+  &lt;media-container class="field" data-field-theme="putty"&gt;
+    &lt;mux-video src="your-video.m3u8" playsinline&gt;&lt;/mux-video&gt;
+    &lt;!-- FIELD's keys: paste from field.html --&gt;
+  &lt;/media-container&gt;
+&lt;/video-player&gt;</code></pre><button type="button" class="copy">Copy</button></div>
+        </li>
+      </ol>
+    </section>
   </main>
+
+  <footer class="foot">
+    <div class="foot-l">
+      <p class="foot-mark">FIELD</p>
+      <p>A skin for Video.js 10, free under Apache 2.0.</p>
+    </div>
+    <div class="foot-r">
+      <p>Film: <a href="https://www.caminandes.com/">Caminandes 3: Llamigos</a>, © Blender Foundation, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></p>
+      <p>Streaming by <a href="https://www.mux.com">Mux</a>. Built on <a href="https://videojs.org">Video.js 10</a>.</p>
+      <p>Designed by <a href="https://x.com/zazzygfx">Zazzy</a>. Made for the Video.js Skins Challenge.</p>
+    </div>
+  </footer>
+
+  <!-- docked mini player (hero scrolled away) -->
+  <div class="mini" data-mini hidden>
+    <button type="button" class="mini-thumb" aria-label="Back to the player"><img alt="" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=168" width="84" height="48"></button>
+    <div class="mini-t"><b>Caminandes 3</b><span class="mini-c" data-mini-c>00 00 00</span></div>
+    <button type="button" class="key mini-play" aria-label="Pause"><span class="dp-icon" aria-hidden="true"></span></button>
+  </div>
+
+  <!-- phone dock -->
+  <nav class="dock" aria-label="Sections">
+    <span class="dock-c" data-tape aria-hidden="true">00 00 00</span>
+    <a href="#touch" data-tab="touch">Touch</a>
+    <a href="#style" data-tab="style">Style</a>
+    <a href="#states" data-tab="states">States</a>
+    <a href="#install" class="dock-get">Get</a>
+  </nav>
+
+  <!-- phone menu sheet -->
+  <div class="sheet-wrap" data-sheet hidden>
+    <div class="sheet-scrim" data-close></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
+      <div class="sheet-handle" data-drag aria-hidden="true"></div>
+      <p class="sheet-h" id="sheet-h">Jump to</p>
+      <a class="sheet-row" href="#touch"><span><b>Two things to touch</b><small>The wheel and the key</small></span><i aria-hidden="true">›</i></a>
+      <a class="sheet-row" href="#style"><span><b>Make it yours</b><small>Materials, colour, Holiday</small></span><i aria-hidden="true">›</i></a>
+      <a class="sheet-row" href="#states"><span><b>Twenty states</b><small>Swipe through every moment</small></span><i aria-hidden="true">›</i></a>
+      <a class="sheet-row" href="#gestures"><span><b>Gestures</b><small>Try them on the player</small></span><i aria-hidden="true">›</i></a>
+      <a class="sheet-row" href="#install"><span><b>Install</b><small>Three steps</small></span><i aria-hidden="true">›</i></a>
+      <div class="sheet-cta"><a class="cta-get" href="#install">Get FIELD</a></div>
+    </div>
+  </div>
+
+  <p class="toast" data-toast role="status" hidden><span aria-hidden="true">✓</span>Copied</p>
 </body>
 </html>

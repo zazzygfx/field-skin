@@ -3,7 +3,7 @@
  * Every id gets the player number so several players can share a page.
  * Licensed under the Apache License, Version 2.0
  */
-export type PlayerOpts = { theme?: string; autoplay?: boolean };
+export type PlayerOpts = { theme?: string; preload?: 'auto' | 'none' };
 
 export function playerMarkup(n: number, o: PlayerOpts = {}): string {
   return `<video-player>
@@ -13,7 +13,7 @@ export function playerMarkup(n: number, o: PlayerOpts = {}): string {
       src="https://stream.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU.m3u8"
       playsinline
       crossorigin="anonymous"
-      preload="${o.autoplay ? 'auto' : 'none'}" muted${o.autoplay ? ' autoplay' : ''}>
+      preload="${o.preload ?? 'none'}" muted>
       <track kind="chapters" src="/chapters.vtt" srclang="en" label="Chapters" default>
       <track kind="captions" src="/captions-en.vtt" srclang="en" label="English">
     </mux-video>

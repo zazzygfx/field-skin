@@ -59,6 +59,9 @@ All are recorded in `SPEC.md`; designer overrides beat Figma.
 ## What's left
 
 **Step 8 — showcase site (done as a draft)**
+- The Apple-style restyle was reverted (designer decision); the site is the FIELD look from Figma.
+- Hero autoplay: plays muted at 50% in view with a "Tap for sound" chip; pauses when fully out unless the visitor took it over (sound on / own play), in which case the mini player docks.
+- Theme tour: first play of a visit cycles Putty → Ink → Liquid → Holiday Snow → Holiday Pine (~1s each, 200ms crossfade, name chip), then Putty. Any tap/click/key stops it; `sessionStorage` `field:tour`; skipped under reduced motion.
 - `index.html` is now the site (`src/site/`); the player alone with Shift+D lives at `dev.html`.
 - Players are generated from `src/site/player.ts` (made from `dev.html`, ids numbered per player); the state forcing is shared in `src/dev/runner.ts`.
 - Not built from the Figma: the "Made for two thumbs" phone section (upright/sideways renders + QR) and the GitHub link (no repo yet).

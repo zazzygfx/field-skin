@@ -30,7 +30,7 @@ const waiting = new Map<number, ((p: Player) => void)[]>();
 function mountSlot(slot: HTMLElement): Player | null {
   const n = Number(slot.dataset.player);
   if (players.has(n)) return players.get(n)!;
-  slot.innerHTML = playerMarkup(n, { theme: slot.dataset.theme, autoplay: 'autoplay' in slot.dataset });
+  slot.innerHTML = playerMarkup(n, { theme: slot.dataset.theme, preload: 'hero' in slot.dataset ? 'auto' : 'none' });
   const root = $('media-container.field', slot);
   if (!root) return null;
   mountField(root);
@@ -39,7 +39,6 @@ function mountSlot(slot: HTMLElement): Player | null {
   players.set(n, p);
   // one picture with sound at a time: starting one pauses the others
   media.addEventListener('play', () => {
-    if (parking.has(p)) return;
     if (root.getAttribute('data-field-force') === 'demo') root.removeAttribute('data-field-force');
     p.displaced = false;
     for (const o of players.values())
@@ -55,13 +54,16 @@ function mountSlot(slot: HTMLElement): Player | null {
 }
 
 /** Demo players wait paused mid-film with their keys showing (no pause shelf). */
-const parking = new Set<Player>();
 async function park(p: Player) {
-  parking.add(p);
-  await p.media.play().catch(() => {});
-  p.media.pause();
-  p.media.currentTime = 83.4;
-  parking.delete(p);
+  const m = p.media;
+  m.setAttribute('preload', 'auto');
+  if (m.readyState < 1) {
+    await new Promise<void>((res) => {
+      m.addEventListener('loadedmetadata', () => res(), { once: true });
+      setTimeout(res, 8000);
+    });
+  }
+  m.currentTime = 83.4;
   p.root.setAttribute('data-field-force', 'demo');
   (p.root as HTMLElement & { fieldDev?: { render: () => void } }).fieldDev?.render();
 }
@@ -90,25 +92,138 @@ const lazy = new IntersectionObserver(
   { rootMargin: '600px 0px' },
 );
 for (const slot of $$('[data-player]')) {
-  if ('autoplay' in slot.dataset) mountSlot(slot);
+  if ('hero' in slot.dataset) mountSlot(slot);
   else if ('coarseOnly' in slot.dataset && !coarse.matches) continue;
   else lazy.observe(slot);
 }
 const hero = players.get(1)!;
 
-/* ------------------------------------------------------- hero: clear unmute */
-{
-  const btns = $$<HTMLButtonElement>('.unmute');
-  const sync = () => btns.forEach((b) => (b.hidden = !hero.media.muted));
-  hero.media.addEventListener('volumechange', sync);
-  btns.forEach((b) =>
-    b.addEventListener('click', () => {
-      hero.media.muted = false;
-      if (hero.media.volume < 0.4) hero.media.volume = 0.7;
-      if (hero.media.paused) void hero.media.play();
-    }),
-  );
+/* ------------------------------------- hero: scroll autoplay + sound chip */
+/*
+ * 50% in view → plays muted. Fully out of view → pauses, unless the visitor
+ * has made it theirs (sound on, or pressed play/pause themselves): then the
+ * mini player docks and it keeps going. A visitor's own pause is respected.
+ */
+const heroCtl = (() => {
+  const m = hero.media;
+  const chip = $<HTMLButtonElement>('[data-sound-chip]')!;
+  let engaged = false;
+  let userPaused = false;
+  let ours = 0; // play/pause calls made by the autoplay (not the visitor)
+  const listeners = new Set<() => void>();
+  const changed = () => listeners.forEach((f) => f());
+
+  const auto = (fn: () => void) => {
+    ours++;
+    fn();
+  };
+  m.addEventListener('play', () => {
+    if (ours) return void ours--;
+    engaged = true;
+    userPaused = false;
+    changed();
+  });
+  m.addEventListener('pause', () => {
+    if (ours) return void ours--;
+    // another player took over, the film ended, or the browser paused a hidden tab
+    if (hero.displaced || m.ended || document.hidden) return;
+    userPaused = true;
+    changed();
+  });
+  m.addEventListener('volumechange', () => {
+    if (!m.muted) engaged = true;
+    sync();
+    changed();
+  });
+  const sync = () => (chip.hidden = !(m.muted && !m.paused));
+  ['play', 'pause'].forEach((ev) => m.addEventListener(ev, sync));
+  chip.addEventListener('click', () => {
+    m.muted = false;
+    if (m.volume < 0.4) m.volume = 0.7;
+    if (m.paused) void m.play();
+  });
+
+  let ratio = 0;
+  const tryPlay = () => {
+    if (ratio < 0.5 || !m.paused || userPaused || m.ended || document.hidden) return;
+    auto(() => {
+      m.muted = m.muted || !engaged;
+      void m.play().catch(() => ours && ours--);
+    });
+  };
+  new IntersectionObserver(
+    ([e]) => {
+      ratio = e.intersectionRatio;
+      if (ratio >= 0.5) tryPlay();
+      else if (!e.isIntersecting && !engaged && !m.paused) auto(() => m.pause());
+    },
+    { threshold: [0, 0.5] },
+  ).observe($('.hero-paper')!);
+  document.addEventListener('visibilitychange', tryPlay);
   sync();
+  return { engaged: () => engaged, onChange: (f: () => void) => listeners.add(f) };
+})();
+
+/* ------------------------------------------- hero: theme tour (once a visit) */
+/*
+ * First play of the visit: Putty → Ink → Liquid → Holiday Snow → Holiday Pine,
+ * ~1s each with a 200ms crossfade and the name in a chip, then back to Putty.
+ * Any tap, click or key stops it at once. Skipped under reduced motion.
+ */
+{
+  const TOUR: [string, string][] = [
+    ['putty', 'Putty'],
+    ['ink', 'Ink'],
+    ['liquid', 'Liquid'],
+    ['holiday-snow', 'Holiday Snow'],
+    ['holiday-pine', 'Holiday Pine'],
+  ];
+  const KEY = 'field:tour';
+  const chip = $('[data-tour-chip]')!;
+  const root = hero.root;
+  const seen = () => {
+    try {
+      return sessionStorage.getItem(KEY) === '1';
+    } catch {
+      return false;
+    }
+  };
+  let timer = 0;
+  let release: (() => void) | null = null;
+  const stop = () => {
+    clearTimeout(timer);
+    removeEventListener('pointerdown', stop, true);
+    removeEventListener('keydown', stop, true);
+    root.removeAttribute('data-site-tour');
+    root.dataset.fieldTheme = 'putty';
+    chip.hidden = true;
+    release?.();
+    release = null;
+  };
+  const step = (i: number) => {
+    if (i >= TOUR.length) return stop();
+    const [theme, name] = TOUR[i];
+    root.dataset.fieldTheme = theme;
+    chip.textContent = name;
+    timer = window.setTimeout(() => step(i + 1), 1000);
+  };
+  const start = () => {
+    if (seen() || reduced()) return;
+    try {
+      sessionStorage.setItem(KEY, '1');
+    } catch {
+      /* private mode: the tour may run again, that's fine */
+    }
+    // keep the keys showing so the materials can be seen
+    type Lockable = HTMLElement & { store?: { state?: { requestControlsLock?: () => () => void } } };
+    release = root.closest<Lockable>('video-player')?.store?.state?.requestControlsLock?.() ?? null;
+    root.setAttribute('data-site-tour', '');
+    chip.hidden = false;
+    addEventListener('pointerdown', stop, true);
+    addEventListener('keydown', stop, true);
+    step(0);
+  };
+  hero.media.addEventListener('play', start, { once: true });
 }
 
 /* -------------------------------------------------- scroll tape counter */
@@ -136,12 +251,13 @@ const hero = players.get(1)!;
   let heroOut = false;
   const sync = () => {
     const started = m.currentTime > 0 || !m.paused;
-    mini.hidden = !(heroOut && started && !hero.displaced);
+    mini.hidden = !(heroOut && started && heroCtl.engaged() && !hero.displaced);
     mini.toggleAttribute('data-paused', m.paused);
     play.setAttribute('aria-label', m.paused ? 'Play' : 'Pause');
     renderCounter(c, formatCounter(m.currentTime), false);
   };
   ['play', 'pause', 'timeupdate', 'seeked'].forEach((ev) => m.addEventListener(ev, sync));
+  heroCtl.onChange(sync);
   new IntersectionObserver(([e]) => {
     heroOut = !e.isIntersecting;
     sync();

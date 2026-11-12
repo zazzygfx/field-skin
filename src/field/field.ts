@@ -123,6 +123,8 @@ export function mountField(root: HTMLElement): void {
     if (pipRow) pipRow.hidden = size === 'xl';
     if (fsRow) fsRow.hidden = size !== 'xs';
     if (moreGroup) moreGroup.hidden = size === 'xl';
+    const moreFs = q('.field-more-fsrow');
+    if (moreFs) moreFs.hidden = size !== 'xs';
     render();
   };
   new ResizeObserver(([entry]) => applySize(entry.contentRect.width)).observe(root);
@@ -282,15 +284,16 @@ export function mountField(root: HTMLElement): void {
   });
 
   /* ---------- Quality: high → low, "Auto (720p)" → "Auto" + accent value (Figma 174:1088) ---------- */
-  const quality = root.querySelector('media-quality-radio-group');
+  const qualities = Array.from(root.querySelectorAll('media-quality-radio-group'));
   const height = (el: Element) => parseInt(el.getAttribute('data-rendition') === 'auto' ? 'Infinity' : (el.textContent ?? ''), 10) || 0;
-  const splitAuto = () => {
+  const splitAuto = () => qualities.forEach(splitAutoIn);
+  const splitAutoIn = (quality: Element) => {
     // Reverse the real DOM order (Auto first, then highest → lowest) so arrow keys follow the screen.
-    const items = Array.from(quality?.querySelectorAll<HTMLElement>(':scope > .field-option') ?? []);
+    const items = Array.from(quality.querySelectorAll<HTMLElement>(':scope > media-menu-radio-item'));
     const auto = items.filter((i) => /auto/i.test(i.getAttribute('data-rendition') ?? '') || /^auto/i.test(i.textContent?.trim() ?? ''));
     const rest = items.filter((i) => !auto.includes(i)).sort((a, b) => height(b) - height(a));
     const wanted = [...auto, ...rest];
-    if (wanted.some((el, i) => items[i] !== el)) quality?.append(...wanted);
+    if (wanted.some((el, i) => items[i] !== el)) quality.append(...wanted);
     for (const item of items) {
       const label = item.querySelector<HTMLElement>('[data-part="label"]');
       const badge = item.querySelector<HTMLElement>('[data-part="badge"]');
@@ -301,17 +304,17 @@ export function mountField(root: HTMLElement): void {
       badge.hidden = false;
     }
   };
-  if (quality) new MutationObserver(splitAuto).observe(quality, { subtree: true, childList: true, characterData: true });
+  qualities.forEach((q) => new MutationObserver(() => splitAutoIn(q)).observe(q, { subtree: true, childList: true, characterData: true }));
 
   /* ---------- Captions: hide the stream's unlabelled in-manifest track ---------- */
-  const captionsGroup = root.querySelector('media-captions-radio-group');
+  const captionsGroups = Array.from(root.querySelectorAll('media-captions-radio-group'));
   const hideUnknown = () => {
-    for (const item of captionsGroup?.querySelectorAll<HTMLElement>('.field-option') ?? []) {
+    for (const item of root.querySelectorAll<HTMLElement>('media-captions-radio-group > media-menu-radio-item')) {
       const unknown = /unknown language/i.test(item.textContent ?? '');
       if (unknown && !item.hidden) item.hidden = true;
     }
   };
-  if (captionsGroup) new MutationObserver(hideUnknown).observe(captionsGroup, { childList: true, subtree: true });
+  captionsGroups.forEach((g) => new MutationObserver(hideUnknown).observe(g, { childList: true, subtree: true }));
   hideUnknown();
   splitAuto();
   menu?.addEventListener('open-change', () => {
@@ -340,6 +343,92 @@ export function mountField(root: HTMLElement): void {
       target?.click();
     });
   }
+
+  /* ---------- Touch: the key opens the More sheet (one list, one level deep) ---------- */
+  const more = root.querySelector<HTMLElement>('.field-more');
+  const coarse = matchMedia('(pointer: coarse)');
+  const pickMenu = () => settingsKey?.setAttribute('commandfor', coarse.matches && more ? more.id : (menu?.id ?? ''));
+  pickMenu();
+  coarse.addEventListener?.('change', pickMenu);
+  more?.addEventListener('open-change', (e) => {
+    if ((e as CustomEvent<{ open: boolean }>).detail.open) {
+      sounds.play('menu');
+      hideUnknown();
+      splitAuto();
+      syncChapterPage();
+    }
+  });
+  // Back rows step out one level instead of closing the sheet
+  more?.querySelectorAll<HTMLElement>('.field-more-back').forEach((b) =>
+    b.addEventListener('select', (e) => {
+      e.preventDefault();
+      (b.closest('media-menu-content') as HTMLElement & { close?: () => void } | null)?.close?.();
+    }),
+  );
+  // Key sounds toggles in place
+  const ksRow = more?.querySelector<HTMLElement>('.field-more-ks');
+  const ksValue = more?.querySelector<HTMLElement>('.field-more-ks-value');
+  const syncKs = () => ksValue && (ksValue.textContent = sounds.enabled ? 'On' : 'Off');
+  ksRow?.addEventListener('select', (e) => {
+    e.preventDefault();
+    sounds.set(!sounds.enabled);
+    if (ksGroup) ksGroup.value = sounds.enabled ? 'on' : 'off';
+    syncKs();
+    sounds.play('tick');
+  });
+  syncKs();
+  // "Auto (720p)" → "Auto" in the row values
+  more?.querySelectorAll<HTMLElement>('[data-part="value"]').forEach((v) =>
+    new MutationObserver(() => {
+      const t = v.textContent ?? '';
+      const trimmed = t.replace(/^(Auto)\s*\(.*\)$/i, '$1');
+      if (trimmed !== t) v.textContent = trimmed;
+    }).observe(v, { childList: true, characterData: true, subtree: true }),
+  );
+  // Chapters page: Start over, then one row per chapter
+  const chPage = more?.querySelector<HTMLElement>('.field-more-chapters');
+  const chRow = more?.querySelector<HTMLElement>('.field-more-chapters-row');
+  let chBuilt = '';
+  const syncChapterPage = () => {
+    if (!chPage || !chRow) return;
+    const list = root.hasAttribute('data-field-no-chapters') ? [] : chapters;
+    // data-hidden (not hidden): Video.js re-applies a submenu trigger's initial `hidden`
+    chRow.toggleAttribute('data-hidden', list.length < 2);
+    const key = list.map((c) => c.start).join(',');
+    if (key !== chBuilt) {
+      chBuilt = key;
+      chPage.querySelectorAll('.field-more-chapter').forEach((n) => n.remove());
+      list.forEach((c, i) => {
+        const item = document.createElement('media-menu-item');
+        item.className = 'field-more-row field-more-chapter';
+        item.innerHTML = `<span class="field-more-n">${i + 1}</span><span class="field-more-title"></span><span class="field-more-value">${formatShort(c.start)}</span>`;
+        item.querySelector('.field-more-title')!.textContent = c.title || `Chapter ${i + 1}`;
+        item.addEventListener('select', () => {
+          media.currentTime = c.start;
+          void media.play();
+        });
+        chPage.append(item);
+      });
+    }
+    const t = media.currentTime;
+    chPage.querySelectorAll<HTMLElement>('.field-more-chapter').forEach((n, i) => {
+      const c = list[i];
+      n.toggleAttribute('data-current', !!c && t >= c.start && t < c.end);
+    });
+  };
+  more?.querySelector('.field-more-restart')?.addEventListener('select', () => {
+    media.currentTime = 0;
+    void media.play();
+  });
+  syncChapterPage();
+  // build as soon as the chapters track loads; keep the current row in step
+  let chTries = 0;
+  const chPoll = setInterval(() => {
+    syncChapterPage();
+    if (chapters.length || ++chTries > 40) clearInterval(chPoll);
+  }, 250);
+  for (const ev of ['seeked', 'pause', 'play', 'loadedmetadata']) media.addEventListener(ev, syncChapterPage);
+  settingsKey?.addEventListener('click', syncChapterPage, true);
 
   /* ---------- Hint bar: after the first keyboard action, 4 s (SPEC §9) ---------- */
   let hinted = false;

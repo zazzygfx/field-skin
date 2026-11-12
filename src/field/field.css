@@ -292,16 +292,14 @@
   overflow: hidden;
 }
 .field .field-play .field-icon {
+  /* 44% of the key (≈26px on 58), truly centred — no nudge */
   position: absolute;
   left: 50%;
-  top: calc(var(--field-play-size) * 13 / 58 - 1px);
-  translate: calc(-50% - 1px) 0;   /* Figma sits the glyph 1px left of centre */
+  top: 50%;
+  width: calc(var(--field-play-size) * .44);
+  height: calc(var(--field-play-size) * .44);
+  translate: -50% -50%;
 }
-.field .field-play [data-icon="play"],
-.field .field-play [data-icon="replay"] { top: calc(var(--field-play-size) * 12.64 / 58 - 1px); }
-.field .field-play [data-icon="pause"] { width: calc(23px * var(--play-k, 1)); height: calc(23px * var(--play-k, 1)); }
-.field .field-play [data-icon="play"],
-.field .field-play [data-icon="replay"] { width: calc(22px * var(--play-k, 1)); height: calc(22px * var(--play-k, 1)); }
 
 /* Tape-transport morph (SPEC §5): bars slide together (0–80 ms), then the
    triangle grows in as the key rises (80–180 ms). Same in reverse. */
@@ -700,8 +698,7 @@
 }
 .field .field-bigplay {
   --field-play-size: 96px;
-  --play-k: 1.6552;                 /* 96 / 58 */
-  border-radius: calc(15px * var(--play-k));
+  border-radius: calc(var(--field-play-size) * 15 / 58);
 }
 .field .field-center:has(> .field-bigplay:not([data-started])) {
   background: radial-gradient(ellipse 40% 45% at 50% 50%, color-mix(in srgb, var(--field-counter) 38%, transparent), transparent);
@@ -957,8 +954,21 @@
 }
 
 /* Counter digits roll while scrubbing */
-.field .field-counter { overflow: hidden; }
-.field .field-digit { display: inline-block; }
+.field .field-counter { overflow: hidden; font-variant-numeric: tabular-nums; }
+/* each character in its own fixed-width, clipped cell: a rolling digit never
+   overlaps its neighbours (fixes "00 0¹ ²⁰") */
+.field .field-digit {
+  display: inline-block;
+  width: 1ch;
+  height: 1.25em;
+  line-height: 1.25em;
+  overflow: hidden;
+  text-align: center;
+  vertical-align: top;
+  margin-right: .04em;                 /* the counter's 4% tracking, kept per cell */
+}
+.field .field-digit:last-child { margin-right: 0; }
+.field .field-digit > span { display: block; }
 
 /* ---------- Menu: speed chips + More rows (M and smaller) ---------- */
 .field .field-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1013,7 +1023,7 @@
   .field > * { --field-row-gap: 8px; }
   .field .field-counter,
   .field .field-pill-right media-fullscreen-button { display: none; }
-  .field .field-bigplay { --field-play-size: 72px; --play-k: 1.2414; }
+  .field .field-bigplay { --field-play-size: 72px; }
   .field .field-ready-title { font-size: 15px; }
   .field .field-scrub-tag { font-size: 12px; padding: 4px 6px; }
 }
@@ -1208,32 +1218,6 @@
   touch-action: manipulation;
 }
 .field .field-shelf button:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
-
-.field .field-shelf-resume {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid var(--field-accent-edge);
-  border-radius: 12px;
-  background: var(--field-accent);
-  color: var(--field-on-accent) !important;
-  text-align: left;
-}
-.field .field-shelf-resume-icon {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--field-on-accent);
-  color: var(--field-accent);
-}
-.field .field-shelf-resume-icon .field-icon { width: 18px; height: 18px; }
-.field .field-shelf-resume-text { display: flex; flex-direction: column; gap: 2px; }
-.field .field-shelf-resume-title { font: 700 16px/normal var(--field-font); font-variation-settings: "opsz" 14; }
-.field .field-shelf-resume-from { font: 400 11px/normal var(--field-mono); letter-spacing: .11px; opacity: .85; }
 
 .field .field-shelf-row {
   display: flex;
@@ -1480,6 +1464,81 @@
 /* Ready forced from the dev panel looks like the real thing */
 .field[data-field-force="ready"] .field-ready { display: block; }
 .field[data-field-force="ready"] :is(.field-chip, .field-scrim, .field-controls-content, .field-rail) { opacity: 0; visibility: hidden; }
+
+/* ---------- Touch More sheet: one short list, 52px rows, value on the right ---------- */
+.field .field-more-page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  outline: none;
+  animation: field-page-in 180ms var(--field-ease);
+}
+@keyframes field-page-in { from { opacity: 0; transform: translateX(16px); } }
+/* one page at a time: Video.js hides inactive pages and marks the parent while a child is open */
+.field .field-more-page[hidden],
+.field .field-more-page[data-child-open] { display: none; }
+.field .field-more-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--field-edge);
+  border-radius: 12px;
+  background: var(--field-key);
+  color: var(--field-ink);
+  font: 600 15px/1.2 var(--field-font);
+  font-variation-settings: "opsz" 14;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 120ms ease-out;
+}
+.field .field-more-row[hidden],
+.field .field-more-row[data-hidden] { display: none; }
+.field .field-more-row:active { background-image: linear-gradient(var(--field-layer-press), var(--field-layer-press)); }
+.field .field-more-row:focus-visible,
+.field .field-more-row[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field .field-more-value {
+  margin-left: auto;
+  color: var(--field-ink-62);
+  font: 400 13px/1 var(--field-mono);
+}
+.field .field-chev { color: var(--field-ink-62); font: 400 20px/1 var(--field-font); }
+.field .field-more-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 6px;
+  font: 700 15px/1 var(--field-font);
+  cursor: pointer;
+  outline: none;
+}
+.field .field-more-back:active { opacity: .6; }
+.field .field-more-back:focus-visible,
+.field .field-more-back[data-highlighted] { box-shadow: 0 0 0 2px var(--field-ink); border-radius: 10px; }
+.field .field-more-options { display: flex; flex-direction: column; gap: 4px; }
+.field .field-more-option[hidden] { display: none; }
+.field .field-more-option .field-check { display: none; margin-left: auto; color: var(--field-accent); font-weight: 700; }
+.field .field-more-option[aria-checked="true"],
+.field .field-more-chapter[data-current] {
+  border-color: var(--field-counter);
+  background: var(--field-counter);
+  color: var(--field-counter-text);
+}
+.field .field-more-option[aria-checked="true"] .field-check { display: inline; }
+.field .field-more-chapter[data-current] .field-more-value { color: color-mix(in srgb, var(--field-counter-text) 70%, transparent); }
+.field .field-more-n { font: 700 13px/1 var(--field-mono); color: var(--field-ink-62); min-width: 1.2em; }
+.field .field-more-chapter[data-current] .field-more-n { color: var(--field-accent); }
+.field .field-more-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (pointer: coarse) {
+  .field .field-more { padding-top: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .field .field-more-page { animation: none; } }
 
 /* ---------- Reduced motion: no translate, no scale; fades only ---------- */
 @media (prefers-reduced-motion: reduce) {

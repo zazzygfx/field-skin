@@ -39,6 +39,10 @@
     // dev: ?w=364 sets the player width (XL 1180 · M 846 · S 500 · XS 364)
     const w = new URLSearchParams(location.search).get('w');
     if (w) document.documentElement.style.setProperty('--stage-w', parseInt(w, 10) + 'px');
+    // dev: ?ua=ios pretends to be an iPhone (to check the mute-only volume key)
+    if (new URLSearchParams(location.search).get('ua') === 'ios') {
+      Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
+    }
   </script>
   <script type="module" src="/src/main.ts"></script>
 </head>
@@ -112,10 +116,6 @@
           </div>
 
           <div class="field-shelf" popover="manual" role="dialog" aria-label="Paused">
-            <button type="button" class="field-shelf-resume">
-              <span class="field-shelf-resume-icon"><span class="field-icon" data-icon="play"></span></span>
-              <span class="field-shelf-resume-text"><span class="field-shelf-resume-title">Resume</span><span class="field-shelf-resume-from">from 00:00</span></span>
-            </button>
             <button type="button" class="field-shelf-row field-shelf-restart"><span>Start over</span><span class="field-shelf-time">00:00</span></button>
             <div class="field-shelf-chapters" hidden>
               <p class="field-shelf-label">Chapters · from the video</p>
@@ -261,6 +261,45 @@
                       </media-menu-radio-group>
                     </div>
                   </media-menu-group>
+                </media-menu-content>
+              </media-menu>
+
+              <!-- Touch: one short list, 52px rows, value on the right; › opens one level of choices -->
+              <media-menu id="field-more-1" class="field-menu field-more" side="top" align="end">
+                <media-menu-content class="field-more-page">
+                  <media-menu-item commandfor="field-more-speed-1" class="field-more-row"><span>Speed</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
+                  <media-menu-item commandfor="field-more-quality-1" class="field-more-row"><span>Quality</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
+                  <media-menu-item commandfor="field-more-cc-1" class="field-more-row"><span>Captions</span><span class="field-more-value" data-part="value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
+                  <media-menu-item commandfor="field-more-ch-1" class="field-more-row field-more-chapters-row"><span>Chapters</span><span class="field-more-value"></span><span class="field-chev" aria-hidden="true">›</span></media-menu-item>
+                  <media-menu-item class="field-more-row" data-field-proxy="field-pip-1"><span>Picture-in-picture</span></media-menu-item>
+                  <media-menu-item class="field-more-row field-more-fsrow" data-field-proxy="field-fs-1"><span>Fullscreen</span></media-menu-item>
+                  <media-menu-item class="field-more-row field-more-ks"><span>Key sounds</span><span class="field-more-value field-more-ks-value">Off</span></media-menu-item>
+                </media-menu-content>
+
+                <media-menu-content id="field-more-speed-1" class="field-more-page">
+                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Speed</span></media-menu-item>
+                  <media-playback-rate-radio-group class="field-more-options">
+                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
+                  </media-playback-rate-radio-group>
+                </media-menu-content>
+
+                <media-menu-content id="field-more-quality-1" class="field-more-page">
+                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Quality</span></media-menu-item>
+                  <media-quality-radio-group class="field-more-options">
+                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
+                  </media-quality-radio-group>
+                </media-menu-content>
+
+                <media-menu-content id="field-more-cc-1" class="field-more-page">
+                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Captions</span></media-menu-item>
+                  <media-captions-radio-group class="field-more-options">
+                    <template><media-menu-radio-item class="field-more-row field-more-option"><span data-part="label"></span><media-menu-item-indicator force-mount class="field-check">✓</media-menu-item-indicator></media-menu-radio-item></template>
+                  </media-captions-radio-group>
+                </media-menu-content>
+
+                <media-menu-content id="field-more-ch-1" class="field-more-page field-more-chapters">
+                  <media-menu-item class="field-more-back"><span class="field-chev" aria-hidden="true">‹</span><span>Chapters</span></media-menu-item>
+                  <media-menu-item class="field-more-row field-more-restart"><span>Start over</span><span class="field-more-value">00:00</span></media-menu-item>
                 </media-menu-content>
               </media-menu>
               </media-tooltip-group>

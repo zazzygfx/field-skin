@@ -9,6 +9,7 @@
  */
 import type { Chapter } from './scrub';
 import type { KeySounds } from './sounds';
+import { showKeyBubble, hideKeyBubble } from './bubble';
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -33,28 +34,8 @@ export function mountStates(
   const bigplay = $('.field-bigplay');
 
   /* ---------- Key bubbles: +10s → 01:33 / Muted · tap to unmute (states 04, 06) ---------- */
-  const bubble = $('.field-keybubble');
-  let bubbleTimer = 0;
-  const showBubble = (anchor: HTMLElement | null, text: string, persist = false) => {
-    if (!bubble || !anchor || anchor.offsetParent === null) return;
-    const pill = anchor.closest<HTMLElement>('.field-pill')!;
-    const a = anchor.getBoundingClientRect();
-    const p = pill.getBoundingClientRect();
-    bubble.textContent = text;
-    bubble.hidden = false;
-    bubble.style.left = `${a.left - p.left + a.width / 2}px`;
-    bubble.removeAttribute('data-show');
-    void bubble.offsetWidth; // restart the grow
-    bubble.setAttribute('data-show', '');
-    clearTimeout(bubbleTimer);
-    if (!persist) bubbleTimer = window.setTimeout(hideBubble, 1100);
-  };
-  const hideBubble = () => {
-    clearTimeout(bubbleTimer);
-    if (!bubble) return;
-    bubble.removeAttribute('data-show');
-    bubble.hidden = true;
-  };
+  const showBubble = (anchor: HTMLElement | null, text: string, persist = false) => showKeyBubble(root, anchor, text, persist);
+  const hideBubble = () => hideKeyBubble(root);
   const seekBubble = (dir: 1 | -1, persist = false) => {
     const d = Number.isFinite(media.duration) ? media.duration : Infinity;
     const to = Math.max(0, Math.min(d, media.currentTime + dir * 10));
@@ -79,14 +60,13 @@ export function mountStates(
   let wasMuted = media.muted;
   media.addEventListener('volumechange', () => {
     const nowMuted = media.muted || media.volume === 0;
-    if (nowMuted && !wasMuted && performance.now() - lastInput < 600 && !root.hasAttribute('data-field-wheel')) muteBubble();
+    if (nowMuted && !wasMuted && performance.now() - lastInput < 600 && !root.hasAttribute('data-field-wheel') && !root.hasAttribute('data-field-ios-hint')) muteBubble();
     if (!nowMuted && wasMuted) hideBubble();
     wasMuted = nowMuted;
   });
 
   /* ---------- Pause shelf (XL/M) + phone pause sheet ---------- */
   const shelf = $('.field-shelf');
-  const resumeFrom = $('.field-shelf-resume-from');
   const chaptersBox = $('.field-shelf-chapters');
   const list = $('.field-shelf-list');
   const jumps = $('.field-shelf-jumps');
@@ -116,8 +96,6 @@ export function mountStates(
     );
   };
 
-  const phoneSheet = () => matchMedia('(pointer: coarse) and (orientation: portrait)').matches;
-
   const syncShelf = () => {
     if (!shelf) return;
     const started = bigplay?.hasAttribute('data-started') ?? false;
@@ -130,15 +108,16 @@ export function mountStates(
       root.hasAttribute('data-field-pip') ||
       root.hasAttribute('data-field-scrubbing');
     const want = paused && started && !ended && !dismissed && !blocked;
-    const sheet = phoneSheet();
-    const show = want && (sheet || size === 'xl' || size === 'm');
+    // touch: pause shows only the big centred key; chapters live in the More sheet
+    const touch = matchMedia('(pointer: coarse)').matches;
+    const sheet = false;
+    const show = want && !touch && (size === 'xl' || size === 'm');
 
     const chapters = getChapters();
     const hasChapters = chapters.length > 1 && !root.hasAttribute('data-field-no-chapters');
     if (hasChapters) buildChapters();
     if (chaptersBox) chaptersBox.hidden = !hasChapters;
     if (jumps) jumps.hidden = hasChapters;
-    if (resumeFrom) resumeFrom.textContent = `from ${mmss(media.currentTime)}`;
     const t = media.currentTime;
     list?.querySelectorAll<HTMLElement>('.field-shelf-chapter').forEach((b, i) => {
       const c = chapters[i];
@@ -154,7 +133,6 @@ export function mountStates(
   media.addEventListener('play', () => (dismissed = false));
   new MutationObserver(syncShelf).observe(root, { attributes: true, attributeFilter: ['data-field-size', 'data-field-error', 'data-field-pip', 'data-field-scrubbing', 'data-field-no-chapters'] });
 
-  $('.field-shelf-resume')?.addEventListener('click', () => void media.play());
   $('.field-shelf-restart')?.addEventListener('click', () => {
     media.currentTime = 0;
     void media.play();

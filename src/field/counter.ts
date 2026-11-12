@@ -22,24 +22,28 @@ export function formatShort(seconds: number): string {
  * roll in from above like a tape counter (off under reduced motion).
  */
 export function renderCounter(el: HTMLElement, text: string, roll: boolean): void {
+  // one fixed-width, clipped cell per character; the glyph rolls inside its cell
   if (el.childElementCount !== text.length) {
     el.replaceChildren(
       ...Array.from(text, () => {
-        const s = document.createElement('span');
-        s.className = 'field-digit';
-        return s;
+        const cell = document.createElement('span');
+        cell.className = 'field-digit';
+        cell.append(document.createElement('span'));
+        return cell;
       }),
     );
   }
   const reduce = roll && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  Array.from(el.children).forEach((s, i) => {
+  Array.from(el.children).forEach((cell, i) => {
+    const glyph = cell.firstElementChild as HTMLElement;
     const c = text[i];
-    if (s.textContent === c) return;
-    s.textContent = c;
+    if (glyph.textContent === c) return;
+    glyph.getAnimations?.().forEach((a) => a.cancel());
+    glyph.textContent = c;
     if (roll && !reduce && c !== ' ') {
-      s.animate?.(
+      glyph.animate?.(
         [
-          { transform: 'translateY(-55%)', opacity: 0.2 },
+          { transform: 'translateY(-100%)', opacity: 0.2 },
           { transform: 'translateY(0)', opacity: 1 },
         ],
         { duration: 140, easing: 'cubic-bezier(.2,0,0,1)' },

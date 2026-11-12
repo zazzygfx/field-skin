@@ -56,31 +56,53 @@ export function mountScrub(
     onScrub(null);
   };
 
-  strip.addEventListener('pointermove', (e) => {
+  // Hover lives inside the slider's 44px hit band; leaving it, cancelling,
+  // or the controls fading all hide the preview + tag at once.
+  const hideNow = () => {
+    hovering = false;
+    dragging = false;
+    hide();
+  };
+  slider.addEventListener('pointermove', (e) => {
     if (e.pointerType === 'mouse') hovering = true;
     if (hovering || dragging) show(e.clientX);
   });
-  strip.addEventListener('pointerleave', () => {
+  slider.addEventListener('pointerleave', () => {
     hovering = false;
-    hide();
+    if (!slider.hasAttribute('data-dragging')) hideNow();
   });
+  slider.addEventListener('pointercancel', hideNow);
+  slider.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    show(e.clientX);
+  });
+  // a click without a drag never sets data-dragging: end the press on release
+  document.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = slider.hasAttribute('data-dragging');
+    if (!dragging) {
+      onScrub(null);
+      hide();
+    }
+  });
+  document.addEventListener('pointercancel', () => dragging && hideNow());
+  document.addEventListener('pointermove', (e) => dragging && show(e.clientX));
 
-  // Dragging (any pointer, incl. touch): Video.js marks the slider data-dragging
+  // Video.js marks the slider data-dragging while a drag is in progress
   new MutationObserver(() => {
     const now = slider.hasAttribute('data-dragging');
-    if (now === dragging) return;
-    dragging = now;
-    if (!dragging) {
+    if (now) dragging = true;
+    else if (dragging) {
+      dragging = false;
       onScrub(null);
       hide();
     }
   }).observe(slider, { attributes: true, attributeFilter: ['data-dragging'] });
 
-  document.addEventListener('pointermove', (e) => dragging && show(e.clientX));
-  slider.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    show(e.clientX);
-  });
+  // controls fading takes the preview with them
+  new MutationObserver(() => {
+    if (!root.hasAttribute('data-controls-visible')) hideNow();
+  }).observe(root, { attributes: true, attributeFilter: ['data-controls-visible'] });
 
   // no storyboard → no frame (Video.js marks the thumbnail data-hidden / data-error)
   const syncFrame = () =>

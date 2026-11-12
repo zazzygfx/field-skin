@@ -82,13 +82,14 @@ Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-si
 - **Wake:** pointer move, tap, or any key → fade in **180 ms**. Opacity only.
 - Controls never hide while paused, while a menu is open, while focus is inside the controls, or while the pointer is over them.
 - **Seek hover (pointer):** a **ghost needle** (2px, `--field-ink` 40%) follows the pointer on the strip, with a **counter tag** (ink bg, cream mono `00 01 47`) on a 1px hairline above it. When a storyboard exists, show a **frame preview** 256 × 144 (radius 12, 3px `--field-key` border) above the tag with `02:03 · Chapter 5`.
-- **Scrub (drag):** same preview; the main counter **rolls** to the scrub time.
+- **Scrub (drag):** same preview; the main counter **rolls** to the scrub time. Each counter character sits in its own fixed-width, clipped cell (tabular numbers), so a rolling digit never overlaps its neighbours.
+- The preview + tag hide as soon as the pointer leaves the strip's 44px hit band, on `pointercancel`, and when the controls fade.
 
 ---
 
 ## 5. Play key (icon only — no ring, no meter)
 
-- 58 × 58, radius 15, `--field-key`, 1px edge, hard shadow. Icon only, centred (Figma glyph sits 1px left of centre, 13px from the top). Progress is shown by the strip and the idle rail, not the key.
+- 58 × 58, radius 15, `--field-key`, 1px edge, hard shadow. Icon only: **44% of the key** (≈26px on 58), truly centred — no nudge. Same rule on the big centred key. Progress is shown by the strip and the idle rail, not the key.
 - States: Pause · Play · Replay (ended) · Loading/Buffering (the icon dims to 40%; the counter reads `-- -- --`) · Focus.
 - **Big centred key:** 96 × 96 with the same icons, centred on the picture whenever the video is paused (not ended). Before the first play (Ready) it also shows the title and length under it, and nothing else is on the picture.
 - **Press (tape-transport):**
@@ -103,13 +104,14 @@ Keys never shrink below 48px. They fold away instead. See `reference/05-fluid-si
 Figma 178:886 (component) and 180:629 (open in place).
 
 - **Where:** it opens **inside the left pill, at the volume key**. While open, −10 and +10 fold away; the counter stays; the pill widens to the right into the empty middle. Right pill and play key never move.
-- **Open:** click/tap the volume key and hold ≥ 250 ms, **or** press ↑/↓, **or** hover 400 ms (pointer). Plain tap = **mute / unmute**.
+- **Open (desktop):** hold the volume key ≥ 250 ms, **or** press ↑/↓, **or** hover 400 ms. A plain click = **mute / unmute**.
+- **Open (touch):** **tap** the volume key (no long-press). While the wheel is open the key shows the level, and tapping the key then mutes / unmutes.
 - **Wheel:** 300 × 48 at XL (220 at M, 180 at XS). Ink slot (radius 9, inner shadow) holding a **drum**: horizontal gradient `--field-drum-lo → --field-drum-hi → --field-drum-lo`, with 26 ribs whose spacing follows a cylinder (dense at the edges, fading out). Accent **index line** in the centre. **10 detent bars** under the slot, filled with accent up to the level. Normal pointer cursor (no resize arrows).
 - **Input:** click anywhere on the wheel to jump to that level; drag sideways to roll it (1 detent per 24px); mouse wheel / trackpad and ↑/↓ step by 1; on the focused wheel also ←/→ (±1), PageUp/PageDown (±3), Home/End. Each detent: the ribs roll by one rib (120 ms), the key does a 1-frame sink and shows the new number, a tiny tick plays (if Key sounds are on), optional 8 ms vibration on Android.
 - **Key shows the level:** while open, the volume key turns accent and shows the number `0–10` in mono 18px. At 0 the key turns `--field-counter` (muted).
 - **Close:** 1.5 s after the last input, 600 ms after the pointer leaves the pill, on Esc, or on a click outside. The wheel rolls back into the key (220 ms) and −10/+10 return; the number stays 600 ms, then the speaker icon returns.
 - `role="slider"`, `aria-valuemin=0`, `aria-valuemax=10`, `aria-valuetext="Volume 7 of 10"`.
-- **iPhone:** browsers can't set volume. No wheel; the key only mutes. Desktop + Android get the wheel.
+- **iPhone / iPad:** iOS can't set video volume (detected by user agent, including iPadOS reporting as a Mac — newer iOS accepts a value but ignores it, so a probe can't be trusted). No wheel at all: tap = mute / unmute. The first tap shows a bubble once: `Use your side buttons for volume`. Desktop + Android get the wheel.
 
 ---
 
@@ -126,8 +128,9 @@ Figma 178:886 (component) and 180:629 (open in place).
 All grow from the key that opened them: `transform-origin` = that key, `scale(.92) → 1` + fade, 180 ms. Esc closes and returns focus to the key.
 
 - **Settings (XL/M):** 340 wide, radius 18, `--field-pill` 97%. Groups: **Quality** (from the stream; hidden on single-rendition files) and **Captions** (from the stream). Rows 44px high, radius 9, selected row `--field-counter` with accent value text.
-- **Pause shelf (XL/M):** top-right, 300 wide. **Resume** (accent, shows `from 01:23`) · **Start over** · then either **Chapters** (titles + times from the chapters track, current one highlighted) **or**, with no chapters, quick jumps −30s −10s +10s +30s. Small `Esc hide` hint below. See `reference/06-pause-settings.png`. Figma 174:809 (chapters) / 174:922 (quick jumps). The title chip reads `Paused at 01:23` while the shelf shows; the 96px centred play key shows too. The shelf only appears after playback has started, never while ended, scrubbing, in error or in PiP. Esc hides it until the next pause.
-- **Phone upright:** M3 bottom sheet — 28px top radius, 32 × 4 handle, 48px rows, scrim 40%. *More* sheet = speed chips, captions chips, quality, PiP, fullscreen. *Pause* sheet = Resume, Start over, chapters.
+- **Pause shelf (XL/M, desktop only):** top-right, 300 wide. **Start over** · then either **Chapters** (titles + times from the chapters track, current one highlighted) **or**, with no chapters, quick jumps −30s −10s +10s +30s. Small `Esc hide` hint below. See `reference/06-pause-settings.png`. Figma 174:809 (chapters) / 174:922 (quick jumps). The title chip reads `Paused at 01:23` while the shelf shows; the 96px centred play key shows too. The shelf only appears after playback has started, never while ended, scrubbing, in error or in PiP. Esc hides it until the next pause.
+- **Touch (pointer: coarse):** pausing shows **only the big centred play key** over the picture — no shelf, no sheet opens by itself. The centre key is resume (there is no Resume card anywhere).
+- **More sheet (touch):** M3 bottom sheet (upright) or side sheet (sideways) — 28px top radius, 32 × 4 handle, safe-area padding, scrim 40%. **One short list, 52px rows, current value on the right:** `Speed 1× ›` · `Quality Auto ›` · `Captions English ›` · `Chapters ›` · `Picture-in-picture` · `Key sounds Off` (plus `Fullscreen` at XS, where the fullscreen key folds away). A row with › slides to its choices with a **Back** row at the top; **Chapters** holds `Start over` first, then the chapters. Max one level deep. 44px+ targets, no tap highlight, `:active` press feedback.
 - **Phone sideways:** M3 side sheet from the right, 300 wide, left radius 24.
 
 ---

@@ -11,6 +11,7 @@
  * on Esc, or on a click outside.
  */
 import type { KeySounds } from './sounds';
+import { showKeyBubble } from './bubble';
 
 const STEPS = 10;
 const HOLD_MS = 250;
@@ -24,8 +25,15 @@ const RIBS = 26;
 const RIB_STEP = (83 / 12) * (Math.PI / 180); // Figma: 12 ribs from the centre reach ~83°
 const ROLL_MS = 120;
 
-/** iPhone/iPad can't set media volume from script: the key only mutes there. */
+/** iPhone / iPad (incl. iPadOS that reports as a Mac): media volume is fixed by the side buttons. */
+export function isIOS(): boolean {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/** iOS can't set media volume from script: the key only mutes there. */
 export function canSetVolume(): boolean {
+  if (isIOS()) return false; // newer iOS accepts the value but ignores it, so don't trust a probe
   try {
     const v = document.createElement('video');
     v.volume = 0.5;
@@ -54,7 +62,24 @@ export function mountVolume(
 
   if (!canSetVolume()) {
     root.setAttribute('data-field-no-volume', '');
-    return noop; // the Video.js mute button keeps working on its own
+    // Tap = mute / unmute (Video.js). The first tap explains, once, where volume lives.
+    const HINT = 'field:ios-volume-hint';
+    key.addEventListener('click', () => {
+      let seen = false;
+      try {
+        seen = localStorage.getItem(HINT) === '1';
+        localStorage.setItem(HINT, '1');
+      } catch {
+        /* private mode: show it this once */
+      }
+      if (seen) return;
+      root.setAttribute('data-field-ios-hint', '');
+      setTimeout(() => {
+        showKeyBubble(root, key, 'Use your side buttons for volume', false, 2600);
+        setTimeout(() => root.removeAttribute('data-field-ios-hint'), 2600);
+      }, 30);
+    });
+    return noop;
   }
 
   const level = () => (media.muted ? 0 : Math.round(media.volume * STEPS));
@@ -209,7 +234,7 @@ export function mountVolume(
   let holdTimer = 0;
   let held = false;
   key.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || e.pointerType === 'touch') return; // touch: a tap opens instead (below)
     held = false;
     clearTimeout(holdTimer);
     holdTimer = window.setTimeout(() => {
@@ -235,14 +260,20 @@ export function mountVolume(
   key.addEventListener('pointerup', release);
   key.addEventListener('pointercancel', release);
   // A hold must not also toggle mute: swallow the click that follows it.
+  // Touch: the first tap opens the wheel; a tap while it is open mutes / unmutes.
+  let lastPointer = '';
+  key.addEventListener('pointerdown', (e) => (lastPointer = e.pointerType), true);
   root.addEventListener(
     'click',
     (e) => {
-      if (held && key.contains(e.target as Node)) {
+      if (!key.contains(e.target as Node)) return;
+      const touch = lastPointer === 'touch' || (lastPointer === '' && matchMedia('(pointer: coarse)').matches);
+      if (held || (touch && !isOpen())) {
         e.stopPropagation();
         e.preventDefault();
         held = false;
-      }
+        if (touch) open();
+      } else if (touch) closeIn(IDLE_CLOSE_MS);
     },
     true,
   );

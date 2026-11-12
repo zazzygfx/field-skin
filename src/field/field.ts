@@ -45,15 +45,14 @@ import '@videojs/html/ui/menu-radio-item';
 import '@videojs/html/ui/menu-item-indicator';
 import '@videojs/html/ui/quality-radio-group';
 import '@videojs/html/ui/captions-radio-group';
+import '@videojs/html/ui/slider-thumbnail';
 import { KeySounds } from './sounds';
+import { formatCounter, renderCounter } from './counter';
+import { mountWheel } from './wheel';
+import { mountSpeed } from './speed';
+import { mountScrub, type Chapter } from './scrub';
 
-const pad = (n: number) => String(Math.floor(n)).padStart(2, '0');
-
-/** Tape counter: always `HH MM SS`, so the width never jumps (SPEC §2). */
-export function formatCounter(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return '-- -- --';
-  return `${pad(seconds / 3600)} ${pad((seconds % 3600) / 60)} ${pad(seconds % 60)}`;
-}
+export { formatCounter };
 
 type ControlsState = { requestControlsLock?: () => () => void };
 type PlayerEl = HTMLElement & { store?: { state?: ControlsState } };
@@ -68,7 +67,8 @@ export function mountField(root: HTMLElement): void {
   const player = root.closest<PlayerEl>('video-player');
 
   const counter = root.querySelector<HTMLElement>('.field-counter');
-  const meter = root.querySelector<HTMLElement>('.field-meter');
+  const meters = root.querySelectorAll<HTMLElement>('.field-meter');
+  const length = root.querySelector<HTMLElement>('.field-ready-length');
   const chipBadge = root.querySelector<HTMLElement>('.field-chip-badge');
   const controls = root.querySelector<HTMLElement>('.field-controls-content');
   const menu = root.querySelector<HTMLElement>('.field-menu');
@@ -90,13 +90,15 @@ export function mountField(root: HTMLElement): void {
   }
 
   /* ---------- Counter, meter, chip ---------- */
-  let chapters: { start: number; end: number }[] = [];
+  let chapters: Chapter[] = [];
+  let scrubTime: number | null = null;
 
   const render = () => {
     const t = media.currentTime;
     const d = media.duration;
     const ready = media.readyState >= 1 && Number.isFinite(d) && d > 0;
-    if (counter) counter.textContent = ready ? formatCounter(t) : '-- -- --';
+    if (counter) renderCounter(counter, ready ? formatCounter(scrubTime ?? t) : '-- -- --', scrubTime !== null);
+    if (length && ready) length.textContent = `${Math.floor(d / 60)}:${String(Math.floor(d % 60)).padStart(2, '0')}`;
     root.style.setProperty('--field-progress', ready ? `${(t / d) * 100}%` : '0%');
     if (chipBadge) {
       const i = chapters.findIndex((c) => t >= c.start && t < c.end);
@@ -107,10 +109,9 @@ export function mountField(root: HTMLElement): void {
 
   /** Cut the play-key meter into chapter segments with 2px gaps (Figma 174:338). */
   const segmentMeter = () => {
-    if (!meter) return;
     const d = media.duration;
     if (!chapters.length || !Number.isFinite(d) || d <= 0) {
-      meter.style.removeProperty('mask-image');
+      meters.forEach((m) => m.style.removeProperty('mask-image'));
       return;
     }
     const stops = chapters
@@ -120,7 +121,7 @@ export function mountField(root: HTMLElement): void {
         return `#000 calc(${p}% - 1px), transparent calc(${p}% - 1px), transparent calc(${p}% + 1px), #000 calc(${p}% + 1px)`;
       })
       .join(', ');
-    meter.style.maskImage = `linear-gradient(to right, #000 0, ${stops}, #000 100%)`;
+    meters.forEach((m) => (m.style.maskImage = `linear-gradient(to right, #000 0, ${stops}, #000 100%)`));
   };
 
   const readChapters = () => {
@@ -129,7 +130,7 @@ export function mountField(root: HTMLElement): void {
     if (track.mode === 'disabled') track.mode = 'hidden';
     const cues = track.cues;
     if (!cues || !cues.length) return;
-    chapters = Array.from(cues).map((c) => ({ start: c.startTime, end: c.endTime }));
+    chapters = Array.from(cues).map((c) => ({ start: c.startTime, end: c.endTime, title: (c as VTTCue).text ?? '' }));
     root.toggleAttribute('data-field-chapters', true);
     segmentMeter();
     render();
@@ -199,10 +200,17 @@ export function mountField(root: HTMLElement): void {
     if (open) sounds.play('menu');
   });
 
-  /* ---------- Quality: "Auto (720p)" → "Auto" + accent value, as in Figma 174:1088 ---------- */
+  /* ---------- Quality: high → low, "Auto (720p)" → "Auto" + accent value (Figma 174:1088) ---------- */
   const quality = root.querySelector('media-quality-radio-group');
+  const height = (el: Element) => parseInt(el.getAttribute('data-rendition') === 'auto' ? 'Infinity' : (el.textContent ?? ''), 10) || 0;
   const splitAuto = () => {
-    for (const item of quality?.querySelectorAll<HTMLElement>('.field-option') ?? []) {
+    // Reverse the real DOM order (Auto first, then highest → lowest) so arrow keys follow the screen.
+    const items = Array.from(quality?.querySelectorAll<HTMLElement>(':scope > .field-option') ?? []);
+    const auto = items.filter((i) => /auto/i.test(i.getAttribute('data-rendition') ?? '') || /^auto/i.test(i.textContent?.trim() ?? ''));
+    const rest = items.filter((i) => !auto.includes(i)).sort((a, b) => height(b) - height(a));
+    const wanted = [...auto, ...rest];
+    if (wanted.some((el, i) => items[i] !== el)) quality?.append(...wanted);
+    for (const item of items) {
       const label = item.querySelector<HTMLElement>('[data-part="label"]');
       const badge = item.querySelector<HTMLElement>('[data-part="badge"]');
       const m = label?.textContent?.match(/^(.+?)\s*\((.+)\)$/);
@@ -213,6 +221,35 @@ export function mountField(root: HTMLElement): void {
     }
   };
   if (quality) new MutationObserver(splitAuto).observe(quality, { subtree: true, childList: true, characterData: true });
+
+  /* ---------- Captions: hide the stream's unlabelled in-manifest track ---------- */
+  const captionsGroup = root.querySelector('media-captions-radio-group');
+  const hideUnknown = () => {
+    for (const item of captionsGroup?.querySelectorAll<HTMLElement>('.field-option') ?? []) {
+      const unknown = /unknown language/i.test(item.textContent ?? '');
+      if (unknown && !item.hidden) item.hidden = true;
+    }
+  };
+  if (captionsGroup) new MutationObserver(hideUnknown).observe(captionsGroup, { childList: true, subtree: true });
+  hideUnknown();
+  splitAuto();
+  menu?.addEventListener('open-change', () => {
+    hideUnknown();
+    splitAuto();
+  });
+
+  /* ---------- Step 3: wheel, speed tray, seek hover / scrub ---------- */
+  mountWheel(root, media, sounds, lock);
+  mountSpeed(root, media, sounds, lock);
+  mountScrub(
+    root,
+    media,
+    () => chapters,
+    (t) => {
+      scrubTime = t;
+      render();
+    },
+  );
 
   /* ---------- Hint bar: after the first keyboard action, 4 s (SPEC §9) ---------- */
   let hinted = false;

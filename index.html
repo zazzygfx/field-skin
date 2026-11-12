@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — step 2</title>
+  <title>FIELD — step 3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap">
@@ -64,6 +64,19 @@
             <span><kbd>F</kbd>Full</span>
           </div>
 
+          <div class="field-center">
+            <media-play-button class="field-key field-play field-bigplay" id="field-bigplay-1">
+              <span class="field-icon" data-icon="pause"></span>
+              <span class="field-icon" data-icon="play"></span>
+              <span class="field-icon" data-icon="replay"></span>
+              <span class="field-meter" aria-hidden="true"></span>
+            </media-play-button>
+            <div class="field-ready">
+              <p class="field-ready-title">Caminandes 3: Llamigos</p>
+              <p class="field-ready-meta"><span class="field-ready-length">2:30</span> · Blender Foundation</p>
+            </div>
+          </div>
+
           <media-controls class="field-controls">
             <media-controls-backdrop class="field-scrim"></media-controls-backdrop>
             <media-controls-content class="field-controls-content">
@@ -82,6 +95,14 @@
                   </media-time-slider-chapters>
                   <media-slider-fill class="field-strip-fill"></media-slider-fill>
                   <media-slider-thumb class="field-needle"></media-slider-thumb>
+                  <div class="field-scrub" aria-hidden="true">
+                    <div class="field-scrub-ghost"></div>
+                    <div class="field-scrub-tag"></div>
+                    <div class="field-scrub-preview">
+                      <media-slider-thumbnail class="field-scrub-frame"><img alt="" decoding="async"></media-slider-thumbnail>
+                      <div class="field-scrub-label"></div>
+                    </div>
+                  </div>
                 </media-time-slider>
               </div>
 
@@ -90,10 +111,16 @@
                   <span class="field-counter" aria-hidden="true">-- -- --</span>
                   <media-seek-button class="field-key" id="field-back-1" seconds="-10" label="Back 10 seconds" aria-keyshortcuts="J">−10</media-seek-button>
                   <media-tooltip trigger="field-back-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <media-mute-button class="field-key field-key-icon" id="field-mute-1" aria-keyshortcuts="M">
+                  <media-mute-button class="field-key field-key-icon field-vol" id="field-mute-1" aria-keyshortcuts="M">
                     <span class="field-icon" data-icon="volume"></span>
+                    <span class="field-vol-num" aria-hidden="true"></span>
                   </media-mute-button>
                   <media-tooltip trigger="field-mute-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+                  <div class="field-wheel" role="slider" tabindex="-1" aria-label="Volume" aria-valuemin="0" aria-valuemax="10" hidden>
+                    <div class="field-wheel-slot"><div class="field-wheel-drum"></div><div class="field-wheel-ribs"></div></div>
+                    <div class="field-wheel-index"></div>
+                    <div class="field-wheel-detents" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  </div>
                   <media-seek-button class="field-key" id="field-fwd-1" seconds="10" label="Forward 10 seconds" aria-keyshortcuts="L">+10</media-seek-button>
                   <media-tooltip trigger="field-fwd-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
                 </media-controls-group>
@@ -105,7 +132,8 @@
                     <span class="field-icon" data-icon="captions"></span>
                   </media-captions-button>
                   <media-tooltip trigger="field-cc-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
-                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5"></media-playback-rate-button>
+                  <media-playback-rate-button class="field-key field-speed" id="field-speed-1" rates="1 1.25 1.5 2 0.5" aria-haspopup="true" aria-expanded="false"></media-playback-rate-button>
+                  <div class="field-tray" role="radiogroup" aria-label="Playback speed" hidden></div>
                   <media-tooltip trigger="field-speed-1" side="top" class="field-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="field-tooltip-key"></media-tooltip-shortcut></media-tooltip>
                   <media-pip-button class="field-key field-key-icon" id="field-pip-1" aria-keyshortcuts="P">
                     <span class="field-icon" data-icon="pip"></span>
@@ -178,8 +206,6 @@
           <media-hotkey keys="ArrowLeft" action="seekStep" value="-10"></media-hotkey>
           <media-hotkey keys="l" action="seekStep" value="10"></media-hotkey>
           <media-hotkey keys="j" action="seekStep" value="-10"></media-hotkey>
-          <media-hotkey keys="ArrowUp" action="volumeStep" value="0.1"></media-hotkey>
-          <media-hotkey keys="ArrowDown" action="volumeStep" value="-0.1"></media-hotkey>
           <media-hotkey keys="0-9" action="seekToPercent"></media-hotkey>
           <media-hotkey keys=">" action="speedUp"></media-hotkey>
           <media-hotkey keys="<" action="speedDown"></media-hotkey>
@@ -192,7 +218,7 @@
         </media-container>
       </video-player>
     </div>
-    <p class="note">Step 2 · core controls · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
+    <p class="note">Step 3 · signature motion · XL layout. Film: Caminandes 3: Llamigos © Blender Foundation, CC BY 3.0 · stream by Mux · Video.js 10.</p>
   </main>
 </body>
 </html>

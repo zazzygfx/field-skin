@@ -285,13 +285,30 @@
 }
 .field .field-play [data-icon="play"],
 .field .field-play [data-icon="replay"] { top: calc(var(--field-play-size) * 12.64 / 58 - 1px); }
+.field .field-play [data-icon="pause"] { width: calc(23px * var(--play-k, 1)); height: calc(23px * var(--play-k, 1)); }
 .field .field-play [data-icon="play"],
-.field .field-play [data-icon="replay"],
+.field .field-play [data-icon="replay"] { width: calc(22px * var(--play-k, 1)); height: calc(22px * var(--play-k, 1)); }
+
+/* Tape-transport morph (SPEC §5): bars slide together (0–80 ms), then the
+   triangle grows in as the key rises (80–180 ms). Same in reverse. */
+.field .field-play .field-icon {
+  transition:
+    opacity 100ms var(--field-ease) 80ms,
+    scale 100ms var(--field-ease) 80ms;
+}
+.field .field-play [data-icon="play"],
+.field .field-play [data-icon="replay"] { opacity: 0; scale: .6; }
 .field .field-play[data-paused] [data-icon="pause"],
-.field .field-play[data-ended] [data-icon="pause"],
-.field .field-play[data-ended] [data-icon="play"] { display: none; }
+.field .field-play[data-ended] [data-icon="pause"] {
+  opacity: 0;
+  scale: .3 1;                      /* the two bars slide together */
+  transition-duration: 80ms;
+  transition-delay: 0ms;
+}
+.field .field-play:not([data-paused]) [data-icon="play"],
+.field .field-play[data-ended] [data-icon="play"] { transition-duration: 80ms; transition-delay: 0ms; }
 .field .field-play[data-paused]:not([data-ended]) [data-icon="play"],
-.field .field-play[data-ended] [data-icon="replay"] { display: block; }
+.field .field-play[data-ended] [data-icon="replay"] { opacity: 1; scale: 1; }
 
 .field .field-meter {
   position: absolute;
@@ -309,6 +326,20 @@
   pointer-events: none;
 }
 .field .field-play[data-ended] .field-meter { --field-progress: 100%; }
+
+/* On pause the meter flashes once so you see where you stopped */
+.field .field-meter::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--field-paper);
+  opacity: 0;
+}
+.field .field-play[data-started][data-paused]:not([data-ended]) .field-meter::after {
+  animation: field-flash 300ms ease-out;
+}
+@keyframes field-flash { from { opacity: .6; } to { opacity: 0; } }
 
 /* ---------- Tape strip (174:381) ---------- */
 .field .field-strip {
@@ -512,6 +543,7 @@
   outline: none;
   touch-action: manipulation;
 }
+.field .field-option[hidden],
 .field .field-option[data-availability="unavailable"],
 .field .field-option[data-availability="unsupported"] { display: none; }
 @media (hover: hover) and (pointer: fine) {
@@ -659,12 +691,301 @@
 .field:not([data-controls-visible]) .field-rail { opacity: 1; transition-duration: var(--field-hide); }
 .field:fullscreen:not([data-controls-visible]) { cursor: none; }
 
+/* ---------- Big centred play key (Ready style) — shown while paused ---------- */
+.field .field-center {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  pointer-events: none;
+  transition: opacity var(--field-show) ease-out, visibility 0s;
+}
+.field .field-center > * { pointer-events: auto; }
+.field .field-center:has(> .field-bigplay:not([data-paused])),
+.field .field-center:has(> .field-bigplay[data-ended]),
+.field[data-field-scrubbing] .field-center {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--field-hide) ease-out, visibility 0s var(--field-hide);
+}
+.field .field-bigplay {
+  --field-play-size: 96px;
+  --play-k: 1.6552;                 /* 96 / 58 */
+  border-radius: calc(15px * var(--play-k));
+}
+.field .field-center:has(> .field-bigplay:not([data-started])) {
+  background: radial-gradient(ellipse 40% 45% at 50% 50%, color-mix(in srgb, var(--field-counter) 38%, transparent), transparent);
+}
+.field .field-ready { display: none; text-align: center; color: var(--field-counter-text); text-shadow: 0 1px 2px color-mix(in srgb, var(--field-counter) 60%, transparent); }
+.field .field-center:has(> .field-bigplay:not([data-started])) .field-ready { display: block; }
+.field .field-ready p { margin: 0; }
+.field .field-ready-title { font: 700 18px/1.3 var(--field-font); }
+.field .field-ready-meta { font: 500 12px/1.4 var(--field-font); opacity: .85; }
+/* Ready (state 01): nothing else on the picture */
+.field:has(.field-bigplay:not([data-started])) :is(.field-chip, .field-scrim, .field-controls-content, .field-rail) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ---------- Volume key + thumb-wheel (178:886 / 180:629) ---------- */
+.field { --field-wheel-w: 300px; }
+@container field (max-width: 899px) { .field { --field-wheel-w: 220px; } }
+@container field (max-width: 399px) { .field { --field-wheel-w: 180px; } }
+
+.field .field-vol-num { display: none; font: 700 18px/1 var(--field-mono); }
+.field[data-field-vol-number] .field-vol {
+  background: var(--field-accent);
+  border-color: var(--field-accent-edge);
+  color: var(--field-on-accent);
+}
+.field[data-field-vol-number][data-field-vol-zero] .field-vol {
+  background: var(--field-counter);
+  border-color: var(--field-counter);
+  color: var(--field-counter-text);
+}
+.field[data-field-vol-number] .field-vol .field-icon { display: none; }
+.field[data-field-vol-number] .field-vol .field-vol-num { display: block; }
+.field .field-vol[data-field-sink] { translate: 0 2px; box-shadow: none; transition: none; }
+
+/* −10 / +10 fold away while rolling; the pill widens into the empty middle */
+.field[data-field-wheel] .field-pill-left media-seek-button { display: none; }
+.field[data-field-wheel] .field-pill-left { padding-right: 10px; }
+
+.field .field-wheel {
+  position: relative;
+  flex: none;
+  width: var(--field-wheel-w);
+  height: 48px;
+  margin-left: 2px;
+  outline: none;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: field-wheel-in var(--field-wheel) var(--field-ease);
+}
+.field .field-wheel[hidden] { display: none; }
+.field[data-field-wheel-closing] .field-wheel { animation: field-wheel-out var(--field-wheel) var(--field-ease) forwards; }
+@keyframes field-wheel-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes field-wheel-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 100% 0 0); } }
+
+.field .field-wheel-slot {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 36px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--field-counter);
+}
+.field .field-wheel-slot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .6);
+  pointer-events: none;
+}
+.field .field-wheel-drum {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 3px;
+  height: 30px;
+  border-radius: 6px;
+  background: linear-gradient(to right, var(--field-drum-lo), var(--field-drum-hi), var(--field-drum-lo));
+}
+.field .field-wheel-ribs { position: absolute; inset: 0; }
+.field .field-wheel-ribs > i {
+  position: absolute;
+  top: 5px;
+  width: 1.5px;
+  height: 26px;
+  background: var(--field-counter);
+}
+.field .field-wheel-index {
+  position: absolute;
+  left: calc(50% - 1px);
+  top: -3px;
+  width: 2px;
+  height: 42px;
+  background: var(--field-accent);
+  pointer-events: none;
+}
+.field .field-wheel-detents {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42px;
+  display: flex;
+  gap: 4px;
+}
+.field .field-wheel-detents > i {
+  flex: 1;
+  height: 3px;
+  border-radius: 1.5px;
+  background: color-mix(
+    in srgb,
+    var(--field-accent) calc(clamp(0, var(--field-vol, 0) - var(--i) + 1, 1) * 100%),
+    color-mix(in srgb, var(--field-ink) 20%, transparent)
+  );
+}
+.field .field-wheel-detents > i:nth-child(1) { --i: 1; }
+.field .field-wheel-detents > i:nth-child(2) { --i: 2; }
+.field .field-wheel-detents > i:nth-child(3) { --i: 3; }
+.field .field-wheel-detents > i:nth-child(4) { --i: 4; }
+.field .field-wheel-detents > i:nth-child(5) { --i: 5; }
+.field .field-wheel-detents > i:nth-child(6) { --i: 6; }
+.field .field-wheel-detents > i:nth-child(7) { --i: 7; }
+.field .field-wheel-detents > i:nth-child(8) { --i: 8; }
+.field .field-wheel-detents > i:nth-child(9) { --i: 9; }
+.field .field-wheel-detents > i:nth-child(10) { --i: 10; }
+.field .field-wheel:focus-visible .field-wheel-slot {
+  box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper);
+  overflow: visible;
+}
+
+/* ---------- Speed tray (169:149) — grows out of the speed key ---------- */
+@keyframes field-grow { from { opacity: 0; scale: .92; } }
+.field .field-tray {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--field-edge);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--field-paper) 95%, transparent);
+  box-shadow: var(--field-shadow);
+  backdrop-filter: var(--field-blur);
+  white-space: nowrap;
+  animation: field-grow 200ms var(--field-ease);
+}
+.field .field-tray[hidden] { display: none; }
+.field .field-tray-key {
+  box-sizing: border-box;
+  min-width: 48px;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--field-edge);
+  border-radius: 9px;
+  background: var(--field-key);
+  color: var(--field-ink);
+  font: 700 13px/normal var(--field-font);
+  font-variation-settings: "opsz" 14;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+}
+@media (hover: hover) and (pointer: fine) {
+  .field .field-tray-key:hover { background-image: linear-gradient(var(--field-layer-hover), var(--field-layer-hover)); }
+}
+.field .field-tray-key[aria-checked="true"] {
+  background: var(--field-accent);
+  border-color: var(--field-accent-edge);
+  color: var(--field-on-accent);
+}
+.field .field-tray-key:focus-visible { box-shadow: 0 0 0 2px var(--field-ink), 0 0 0 5px var(--field-paper); }
+.field .field-speed[aria-expanded="true"] {
+  background: var(--field-accent);
+  border-color: var(--field-accent-edge);
+  color: var(--field-on-accent);
+}
+
+/* ---------- Seek hover / scrub: ghost needle, tag, frame (SPEC §4) ---------- */
+.field .field-scrub {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+.field[data-field-scrubbing] .field-scrub { opacity: 1; }
+.field .field-scrub-ghost {
+  position: absolute;
+  left: var(--field-hover-x, 0);
+  top: var(--track-y);
+  width: 2px;
+  height: 20px;
+  translate: -50% -50%;
+  background: color-mix(in srgb, var(--field-ink) 40%, transparent);
+}
+.field .field-scrub-ghost::before {           /* 1px hairline up to the tag */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 1px;
+  height: 14px;
+  translate: -50% 0;
+  background: var(--field-counter);
+}
+.field .field-scrub-tag {
+  position: absolute;
+  left: var(--field-tag-x, 0);
+  bottom: calc(100% - var(--track-y) + 24px);
+  translate: -50% 0;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--field-counter);
+  color: var(--field-counter-text);
+  font: 700 13px/normal var(--field-mono);
+  letter-spacing: .04em;
+  white-space: pre;
+  box-shadow: var(--field-shadow);
+}
+.field .field-scrub-preview {
+  position: absolute;
+  left: var(--field-frame-x, 0);
+  bottom: calc(100% - var(--track-y) + 24px + 30px + 8px);
+  translate: -50% 0;
+  border: 3px solid var(--field-key);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--field-counter);
+  box-shadow: var(--field-shadow);
+}
+.field[data-field-no-frame] .field-scrub-preview { display: none; }
+.field .field-scrub-frame {
+  box-sizing: content-box;
+  display: block;
+  /* Video.js scales the storyboard tile to fit these (SPEC: 256 × 144) */
+  min-width: 256px;
+  max-width: 256px;
+  min-height: 144px;
+  max-height: 144px;
+}
+.field .field-scrub-label {
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  translate: -50% 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--field-key);
+  color: var(--field-ink);
+  font: 600 11px/normal var(--field-font);
+  white-space: nowrap;
+}
+
+/* Counter digits roll while scrubbing */
+.field .field-counter { overflow: hidden; }
+.field .field-digit { display: inline-block; }
+
 /* ---------- Reduced motion: no translate, no scale; fades only ---------- */
 @media (prefers-reduced-motion: reduce) {
   .field .field-key,
   .field .field-key:active,
   .field .field-play:hover { translate: none !important; }
-  .field .field-settings-panel { animation-name: field-fade; }
+  .field .field-tray { animation-name: field-fade; }
+  .field .field-wheel,
+  .field[data-field-wheel-closing] .field-wheel { animation: none; }
+  .field .field-play .field-icon { transition: none !important; scale: 1 !important; }
+  .field [data-popup][data-starting-style],
+  .field [data-popup][data-ending-style] { scale: 1; }
   @keyframes field-fade { from { opacity: 0; } }
 }
 

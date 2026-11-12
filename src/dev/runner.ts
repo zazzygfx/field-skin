@@ -117,11 +117,11 @@ export function createStateRunner(root: HTMLElement): Runner | null {
       dev.speed.open();
     },
     '08': async () => {
-      await pausedAt(22.2);
+      await pausedAt(31);
       const t = Array.from(media.textTracks).find((x) => x.kind === 'captions' && !/unknown/i.test(x.label));
       if (t) t.mode = 'showing';
       force('captions');
-      media.currentTime = 22.2;
+      media.currentTime = 31;
     },
     '09': async () => {
       await pausedAt(83.4);

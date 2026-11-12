@@ -1,22 +1,46 @@
 WEBVTT
 
 NOTE
-Caminandes 3 has no dialogue, so these are sound captions.
-THESE TIMINGS ARE PLACEHOLDERS. Watch the film and adjust every cue
-so it matches the sound on screen before shipping. Keep cues short,
-in square brackets, lower case.
+Caminandes 3 has no dialogue, so these are sound captions: short, in square
+brackets, lower case. Timed (12 Nov 2026) against the film's audio track
+(loudness measured every 0.25 s), the storyboard frames at each moment, and
+Mux's auto-generated track ("hmm?" at 0:28, growling at 0:59 and 1:28).
 
-00:00:02.000 --> 00:00:05.000
+00:00:01.000 --> 00:00:04.500
 [wind over the snow]
 
-00:00:21.500 --> 00:00:24.000
-[penguins squawking]
+00:00:15.000 --> 00:00:17.000
+[thump as the llama slips on the ice]
 
-00:00:57.000 --> 00:01:00.000
-[fence wire twangs]
+00:00:24.700 --> 00:00:26.200
+[penguin squawks]
 
-00:01:24.000 --> 00:01:27.000
-[upbeat music builds]
+00:00:28.000 --> 00:00:29.200
+[llama] hmm?
 
-00:01:55.000 --> 00:01:58.000
-[penguins squawk in the distance]
+00:00:30.200 --> 00:00:33.500
+[train whistle]
+
+00:00:36.200 --> 00:00:46.000
+[steam train thunders past]
+
+00:00:56.700 --> 00:00:58.800
+[crash]
+
+00:00:59.000 --> 00:01:00.500
+[growling]
+
+00:01:06.500 --> 00:01:22.500
+[mine cart rattles down the rails]
+
+00:01:28.000 --> 00:01:30.000
+[growling]
+
+00:01:49.400 --> 00:01:50.600
+[thwack]
+
+00:01:57.500 --> 00:02:10.500
+[gentle music builds]
+
+00:02:12.200 --> 00:02:28.500
+[upbeat music]

@@ -8,16 +8,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#DEDBD2">
-  <title>FIELD — a video player built like a field recorder</title>
-  <meta name="description" content="FIELD is a Video.js 10 skin: putty keys over the picture, a tape counter for time, and a wheel you roll for volume.">
-  <meta property="og:title" content="FIELD — a Video.js 10 skin">
-  <meta property="og:description" content="A video player built like a field recorder.">
-  <meta property="og:image" content="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.png?time=21&width=1200">
+  <title>FIELD — a Video.js 10 skin built like a field recorder</title>
+  <meta name="description" content="FIELD is an open-source Video.js 10 skin: putty keys over the picture, a tape counter for time, and a thumb-wheel you roll for volume. Five themes, 20 states, keyboard and touch.">
+  <link rel="canonical" href="https://field-skin.netlify.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://field-skin.netlify.app/">
+  <meta property="og:site_name" content="FIELD">
+  <meta property="og:title" content="FIELD — a video player built like a field recorder">
+  <meta property="og:description" content="A Video.js 10 skin with putty keys, a tape counter and a volume thumb-wheel. Free under Apache 2.0.">
+  <meta property="og:image" content="https://field-skin.netlify.app/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The FIELD player over a frame of Caminandes 3: a steam train on snowy tracks, with putty keys, the orange strip and the tape counter at 00 00 37.">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="twitter:image" content="https://field-skin.netlify.app/og.jpg">
   <link rel="preconnect" href="https://stream.mux.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Mono:wght@400;700&display=swap">
+  <link rel="preconnect" href="https://image.mux.com">
+  <!-- self-hosted fonts (SIL OFL), preloaded so the big type doesn't reflow late -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/dm-sans-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/space-mono-700-latin.woff2" crossorigin>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <script type="module" src="/src/site/main.ts"></script>
 </head>
 <body>
@@ -49,7 +59,7 @@
     <!-- 1 · Hero -->
     <section class="hero" id="top" aria-label="FIELD">
       <div class="paper hero-paper">
-        <div class="slot" data-player="1" data-hero></div>
+        <div class="slot" data-player="1" data-hero><img class="slot-poster" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=1280" srcset="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=640 640w, https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=960 960w, https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=1280 1280w" sizes="(max-width: 759px) 100vw, min(1208px, 100vw)" width="1280" height="720" alt="" fetchpriority="high"></div>
         <button type="button" class="sound-chip" data-sound-chip hidden><span class="sound-dot" aria-hidden="true"></span>Tap for sound</button>
         <span class="tour-chip" data-tour-chip aria-live="polite" hidden></span>
       </div>
@@ -125,7 +135,7 @@
               <button type="button" class="key sw" data-c="#1E8E4E" aria-pressed="false" aria-label="Green"><i style="background:#1E8E4E"></i></button>
               <button type="button" class="key sw" data-c="#E5336B" aria-pressed="false" aria-label="Pink"><i style="background:#E5336B"></i></button>
               <button type="button" class="key sw" data-c="#E9C77B" aria-pressed="false" aria-label="Sand, too light: watch the guard"><i style="background:#E9C77B"></i></button>
-              <label class="key sw pick" aria-label="Pick any colour"><span aria-hidden="true">+</span><input type="color" value="#FFE14D" data-pick></label>
+              <label class="key sw pick"><span aria-hidden="true">+</span><input type="color" value="#FFE14D" data-pick aria-label="Pick any colour"></label>
             </div>
             <p class="small" data-guard-note>Too light a pick gets darkened until it’s readable on the keys.</p>
           </fieldset>
@@ -140,7 +150,7 @@
         </div>
         <div class="style-preview">
           <div class="paper preview-paper"><div class="slot" data-player="2" data-theme="ink" data-park></div></div>
-          <pre class="code" aria-label="Markup for this look"><code data-style-code></code></pre>
+          <pre class="code" tabindex="0"><code data-style-code></code></pre>
         </div>
       </div>
     </section>
@@ -222,18 +232,18 @@
         <li class="step">
           <span class="key n" aria-hidden="true">1</span>
           <h3>Install Video.js 10</h3>
-          <div class="code-box"><pre><code>npm install @videojs/html @videojs/mux-video</code></pre><button type="button" class="copy">Copy</button></div>
+          <div class="code-box"><pre tabindex="0"><code>npm install @videojs/html @videojs/mux-video</code></pre><button type="button" class="copy">Copy</button></div>
         </li>
         <li class="step">
           <span class="key n" aria-hidden="true">2</span>
           <h3>Add FIELD</h3>
-          <div class="code-box"><pre><code>&lt;link rel="stylesheet" href="field.css"&gt;
+          <div class="code-box"><pre tabindex="0"><code>&lt;link rel="stylesheet" href="field.css"&gt;
 &lt;script type="module" src="field.js"&gt;&lt;/script&gt;</code></pre><button type="button" class="copy">Copy</button></div>
         </li>
         <li class="step">
           <span class="key n" aria-hidden="true">3</span>
           <h3>Drop in your video</h3>
-          <div class="code-box"><pre><code>&lt;video-player&gt;
+          <div class="code-box"><pre tabindex="0"><code>&lt;video-player&gt;
   &lt;media-container class="field" data-field-theme="putty"&gt;
     &lt;mux-video src="your-video.m3u8" playsinline&gt;&lt;/mux-video&gt;
     &lt;!-- FIELD's keys: paste from field.html --&gt;
@@ -258,7 +268,7 @@
 
   <!-- docked mini player (hero scrolled away) -->
   <div class="mini" data-mini hidden>
-    <button type="button" class="mini-thumb" aria-label="Back to the player"><img alt="" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=168" width="84" height="48"></button>
+    <button type="button" class="mini-thumb" aria-label="Back to the player"><img alt="" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=168" width="84" height="48"><video muted playsinline aria-hidden="true" tabindex="-1"></video></button>
     <div class="mini-t"><b>Caminandes 3</b><span class="mini-c" data-mini-c>00 00 00</span></div>
     <button type="button" class="key mini-play" aria-label="Pause"><span class="dp-icon" aria-hidden="true"></span></button>
   </div>

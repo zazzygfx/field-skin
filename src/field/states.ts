@@ -83,7 +83,6 @@ export function mountStates(
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'field-shelf-chapter';
-        b.setAttribute('role', 'listitem');
         b.dataset.start = String(c.start);
         b.innerHTML = `<span class="field-shelf-n">${i + 1}</span><span class="field-shelf-title"></span><span class="field-shelf-time">${mmss(c.start)}</span>`;
         b.querySelector('.field-shelf-title')!.textContent = c.title || `Chapter ${i + 1}`;

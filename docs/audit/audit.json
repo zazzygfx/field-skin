@@ -1,0 +1,42 @@
+{
+  "axe-site-desktop": {
+    "violations": [],
+    "passes": 53
+  },
+  "errorsDesktop": [],
+  "axe-site-phone": {
+    "violations": [],
+    "passes": 52
+  },
+  "errorsPhone": [],
+  "axe-player": {
+    "violations": [],
+    "passes": 35
+  },
+  "keyboard": {
+    "stops": 79,
+    "withoutVisibleRing": [],
+    "hiddenStops": [],
+    "playerKeys": {
+      "before": {
+        "pausedBefore": true,
+        "t": 0
+      },
+      "afterKThenL": {
+        "paused": false,
+        "t": 2.262808
+      }
+    }
+  },
+  "reducedMotion": {
+    "tourRan": false,
+    "theme": "putty",
+    "keyTransition": "0.001s"
+  },
+  "reducedTransparency": {
+    "key": "#edebe2",
+    "pillBackground": "rgb(244, 242, 236)",
+    "backdrop": "none"
+  },
+  "forcedColors": "screenshots saved"
+}

@@ -35,6 +35,11 @@
     .dev-panel .dev-sub { margin: 10px 0 6px; }
     .dev-themes { display: flex; flex-wrap: wrap; gap: 4px; }
     .dev-now { margin: 8px 0 0; font: 11px "Space Mono", monospace; opacity: .7; }
+    /* ?og: 1200×630 Open Graph frame */
+    html.og body { min-height: 0; background: #DEDBD2; overflow: hidden; }
+    html.og main { width: 1080px; margin: 11px auto 0; }
+    html.og .note { display: none; }
+    html.og .field-poster { display: block !important; opacity: 1 !important; visibility: visible !important; }
     .note { margin: 16px 0 0; font: 12px/1.5 "Space Mono", monospace; color: #6b685c; letter-spacing: .02em; }
   </style>
   <script>
@@ -50,6 +55,7 @@
 </head>
 <body>
   <main>
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap">FIELD player</h1>
     <div class="stage">
       <video-player>
         <media-container class="field" data-field-theme="putty">
@@ -121,7 +127,7 @@
             <button type="button" class="field-shelf-row field-shelf-restart"><span>Start over</span><span class="field-shelf-time">00:00</span></button>
             <div class="field-shelf-chapters" hidden>
               <p class="field-shelf-label">Chapters · from the video</p>
-              <div class="field-shelf-list" role="list"></div>
+              <div class="field-shelf-list"></div>
             </div>
             <div class="field-shelf-jumps">
               <button type="button" data-jump="-30">−30s</button>

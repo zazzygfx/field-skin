@@ -19,7 +19,7 @@ export function playerMarkup(n: number, o: PlayerOpts = {}): string {
     </mux-video>
 
     <media-poster class="field-poster">
-      <img alt="" decoding="async" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21">
+      <img alt="" decoding="async" src="https://image.mux.com/xg9MkUaGPFpyU2KzNVDjS71fXdFNW1tEesnbzEBwkDU/thumbnail.webp?time=21&width=1280">
     </media-poster>
 
     <div class="field-chip">
@@ -76,7 +76,7 @@ export function playerMarkup(n: number, o: PlayerOpts = {}): string {
       <button type="button" class="field-shelf-row field-shelf-restart"><span>Start over</span><span class="field-shelf-time">00:00</span></button>
       <div class="field-shelf-chapters" hidden>
         <p class="field-shelf-label">Chapters · from the video</p>
-        <div class="field-shelf-list" role="list"></div>
+        <div class="field-shelf-list"></div>
       </div>
       <div class="field-shelf-jumps">
         <button type="button" data-jump="-30">−30s</button>

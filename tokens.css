@@ -1,0 +1,131 @@
+/*
+ * FIELD — design tokens for a Video.js 10 skin
+ * Licensed under the Apache License, Version 2.0
+ *
+ * Usage on any site:
+ *   <video-player class="field" data-field-theme="putty" style="--field-accent:#FF4D00">
+ */
+
+.field {
+  /* ---------- Putty (default) ---------- */
+  --field-key: #EDEBE2;          /* keys, strip, chip, menu rows */
+  --field-ink: #17160F;          /* icons, labels, needle */
+  --field-edge: #CBC7B8;         /* 1px key + pill edge */
+  --field-pill: rgb(244 242 236 / .94);
+  --field-paper: #F4F2EC;        /* focus halo, panels */
+  --field-counter: #17160F;      /* counter bg, selected row, muted key */
+  --field-counter-text: #F2EFE5;
+  --field-accent: #FF4D00;       /* played time + active choice only */
+  --field-accent-edge: #C23A00;
+  --field-on-accent: #FFF6EF;
+  --field-drum-lo: #59574D;      /* volume wheel drum gradient */
+  --field-drum-hi: #EDEBE2;
+  --field-shadow: 0 2px 0 rgb(23 22 15 / .35);   /* the hard shadow */
+  --field-blur: none;
+
+  /* ---------- Shape + size ---------- */
+  --field-radius: 10px;          /* keys */
+  --field-pill-radius: 14px;
+  --field-key-size: 48px;        /* never below 48 */
+  --field-play-size: 58px;
+  --field-strip-h: 26px;
+  --field-strip-hit: 44px;
+  --field-inset: 28px;           /* 20 / 14 / 10 at M / S / XS */
+
+  /* ---------- Type ---------- */
+  --field-font: "DM Sans", system-ui, sans-serif;
+  --field-mono: "Space Mono", ui-monospace, monospace;
+
+  /* ---------- Motion ---------- */
+  --field-ease: cubic-bezier(.2, 0, 0, 1);
+  --field-show: 180ms;
+  --field-hide: 300ms;
+  --field-press-down: 90ms;
+  --field-press-up: 140ms;
+  --field-menu: 180ms;
+  --field-wheel: 220ms;
+}
+
+/* ---------- Ink: dark keys for dark sites ---------- */
+.field[data-field-theme="ink"] {
+  --field-key: #262520;
+  --field-ink: #F2EFE5;
+  --field-edge: #3D3B33;
+  --field-pill: rgb(23 22 15 / .94);
+  --field-paper: #17160F;
+  --field-counter: #0B0A07;
+  --field-counter-text: #F2EFE5;
+  --field-drum-lo: #2A2925;
+  --field-drum-hi: #8C897C;
+  --field-shadow: 0 2px 0 rgb(0 0 0 / .7);
+}
+
+/* ---------- Liquid: translucent, opt-in ---------- */
+.field[data-field-theme="liquid"] {
+  --field-key: rgb(255 255 255 / .18);
+  --field-ink: #FFFFFF;
+  --field-edge: rgb(255 255 255 / .45);
+  --field-pill: rgb(255 255 255 / .14);
+  --field-paper: rgb(0 0 0 / .5);
+  --field-counter: rgb(0 0 0 / .35);
+  --field-counter-text: #FFFFFF;
+  --field-on-accent: #FFFFFF;
+  --field-drum-lo: rgb(255 255 255 / .2);
+  --field-drum-hi: rgb(255 255 255 / .85);
+  --field-shadow: inset 0 1px 0 rgb(255 255 255 / .45);
+  --field-blur: blur(22px);
+}
+
+/* ---------- Holiday · Snow ---------- */
+.field[data-field-theme="holiday-snow"] {
+  --field-key: #FBF7F0;
+  --field-ink: #0F3B2C;          /* pine */
+  --field-edge: #E2D6C2;
+  --field-pill: rgb(251 247 240 / .95);
+  --field-paper: #FBF7F0;
+  --field-counter: #0F3B2C;
+  --field-counter-text: #E9C77B; /* champagne */
+  --field-accent: #C8102E;       /* cranberry — 5.5:1 on snow */
+  --field-accent-edge: #8E0B21;  /* ember */
+  --field-on-accent: #FFF5F2;
+  --field-drum-lo: #7A6A4E;
+  --field-drum-hi: #F3E6C8;
+  --field-shadow: 0 2px 0 rgb(15 59 44 / .3);
+}
+
+/* ---------- Holiday · Pine ---------- */
+.field[data-field-theme="holiday-pine"] {
+  --field-key: #14402F;
+  --field-ink: #F6EFE2;
+  --field-edge: #2C5C49;
+  --field-pill: rgb(15 51 38 / .95);
+  --field-paper: #0F3326;
+  --field-counter: #081F17;
+  --field-counter-text: #E9C77B;
+  --field-accent: #E9C77B;       /* champagne — 8.5:1 on pine */
+  --field-accent-edge: #B8964B;
+  --field-on-accent: #0F3326;
+  --field-drum-lo: #4D3E22;
+  --field-drum-hi: #E9C77B;
+  --field-shadow: 0 2px 0 rgb(0 0 0 / .6);
+}
+
+/* ---------- Size steps (container queries on the player) ---------- */
+@container field (max-width: 899px) { .field { --field-inset: 20px; } }
+@container field (max-width: 599px) { .field { --field-inset: 14px; } }
+@container field (max-width: 399px) { .field { --field-inset: 10px; --field-play-size: 52px; } }
+
+/* ---------- System preferences ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  .field[data-field-theme="liquid"] {
+    --field-key: #EDEBE2; --field-ink: #17160F; --field-edge: #CBC7B8;
+    --field-pill: #F4F2EC; --field-counter: #17160F; --field-blur: none;
+    --field-shadow: 0 2px 0 rgb(23 22 15 / .35);
+  }
+}
+@media (prefers-contrast: more) {
+  .field { --field-pill: #FFFFFF; --field-edge: var(--field-ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field { --field-show: 0ms; --field-press-down: 0ms; --field-press-up: 0ms; --field-wheel: 0ms; }
+}
